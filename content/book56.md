@@ -12,7 +12,7 @@ series = "WORD"
 +++
 
 # コンテンツ一覧
-- [book56.tar.gz](/book56.tar.gz)
+- [book56.tar.gz](https://drive.proton.me/urls/524KN0JS58#Dr212Euef2nX)
 - [コマンドコピペ用URL](https://paste.c-net.org/HeineVirginia)
 
 # 解説
