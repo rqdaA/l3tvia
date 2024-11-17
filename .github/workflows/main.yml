@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - run: echo l3tvia.rqda.wtf > static/CNAME
+      - run: ls -lah; pwd
       - name: build_and_deploy
         uses: shalzz/zola-deploy-action@v0.19.2
         env:
