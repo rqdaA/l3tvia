@@ -126,7 +126,7 @@ keywords = "Kernel exploit, exploit, pwn, ctf, ROP, Privilege escalation, rona, 
 ###   https://github.com/Jieiku/abridge/blob/master/templates/macros/social.html
 ###############################################################################
 
-feed = true # this adds the RSS feed icon in the footer.
+feed = false # this adds the RSS feed icon in the footer.
 mail = "name@example.com"
 mastodon = "https://mastodon.example.com/@username"
 element = "matrix.example.com"
