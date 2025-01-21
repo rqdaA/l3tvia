@@ -1,0 +1,5 @@
+
+Sitemap: https://l3tvia.rqda.wtf/sitemap.xml
+User-Agent: *
+Allow: /
+Host: https://l3tvia.rqda.wtf
