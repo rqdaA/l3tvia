@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>L3tvia - Build</title>
+    <subtitle>Linux kenel exploitation tutorial by rona</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://l3tvia.rqda.wtf/tags/build/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://l3tvia.rqda.wtf"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-02-19T12:00:00+00:00</updated>
+    <id>https://l3tvia.rqda.wtf/tags/build/atom.xml</id>
+    <entry xml:lang="en">
+        <title>How to Build Android 15 arm64 for QEMU</title>
+        <published>2025-02-19T12:00:00+00:00</published>
+        <updated>2025-02-19T12:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://l3tvia.rqda.wtf/build-aosp/"/>
+        <id>https://l3tvia.rqda.wtf/build-aosp/</id>
+        
+        <content type="html" xml:base="https://l3tvia.rqda.wtf/build-aosp/">&lt;h1 id=&quot;sosukodowoqu-de&quot;&gt;ソースコードを取得&lt;&#x2F;h1&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;mkdir&lt;&#x2F;span&gt;&lt;span&gt; android &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span&gt; android
+&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;repo&lt;&#x2F;span&gt;&lt;span&gt; init&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt; -u&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;android.googlesource.com&#x2F;kernel&#x2F;manifest&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt; -b&lt;&#x2F;span&gt;&lt;span&gt; common-android15-6.6-lts
+&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;repo&lt;&#x2F;span&gt;&lt;span&gt; sync&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt; -c -d -j&lt;&#x2F;span&gt;&lt;span&gt;`&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;nproc&lt;&#x2F;span&gt;&lt;span&gt;`
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;sosukodogai-bian&quot;&gt;ソースコード改変&lt;&#x2F;h1&gt;
+&lt;p&gt;必要なLKMをkernel本体にくっつける作業&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;diff&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-diff &quot;&gt;&lt;code class=&quot;language-diff&quot; data-lang=&quot;diff&quot;&gt;&lt;span&gt;diff --git a&#x2F;arch&#x2F;arm64&#x2F;configs&#x2F;gki_defconfig b&#x2F;arch&#x2F;arm64&#x2F;configs&#x2F;gki_defconfig
+&lt;&#x2F;span&gt;&lt;span&gt;index e4a6cfe6fa5b..260082894c00 100644
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;--- a&#x2F;arch&#x2F;arm64&#x2F;configs&#x2F;gki_defconfig
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;+++ b&#x2F;arch&#x2F;arm64&#x2F;configs&#x2F;gki_defconfig
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -785,3 +785,19 @@ CONFIG_KUNIT_TEST=m
+&lt;&#x2F;span&gt;&lt;span&gt; CONFIG_KUNIT_EXAMPLE_TEST=m
+&lt;&#x2F;span&gt;&lt;span&gt; # CONFIG_KUNIT_DEFAULT_ENABLED is not set
+&lt;&#x2F;span&gt;&lt;span&gt; # CONFIG_RUNTIME_TESTING_MENU is not set
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_PTP_1588_CLOCK=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_E1000=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_E1000E=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_VIRTIO_PCI=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_VIRTIO_BALLOON=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_VIRTIO_BLK=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_VIRTIO_NET=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_9P_FS_SECURITY=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_NET_9P=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_NET_9P_VIRTIO=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_NET_9P_DEBUG=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_9P_FS=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_9P_FS_POSIX_ACL=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_DEVTMPFS=y
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+CONFIG_DEVTMPFS_MOUNT=y
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;build.config.gki b&#x2F;build.config.gki
+&lt;&#x2F;span&gt;&lt;span&gt;index 4b931d9eb333..da87a30d24e8 100644
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;--- a&#x2F;build.config.gki
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;+++ b&#x2F;build.config.gki
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -1,2 +1,2 @@
+&lt;&#x2F;span&gt;&lt;span&gt; DEFCONFIG=gki_defconfig
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-POST_DEFCONFIG_CMDS=&amp;quot;check_defconfig&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+###POST_DEFCONFIG_CMDS=&amp;quot;check_defconfig&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;diff --git a&#x2F;modules.bzl b&#x2F;modules.bzl
+&lt;&#x2F;span&gt;&lt;span&gt;index c93be156738d..9ad3e7624c74 100644
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;--- a&#x2F;modules.bzl
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;+++ b&#x2F;modules.bzl
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -8,7 +8,7 @@ This module contains a full list of kernel modules
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt; _COMMON_GKI_MODULES_LIST = [
+&lt;&#x2F;span&gt;&lt;span&gt;     # keep sorted
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;block&#x2F;virtio_blk.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;block&#x2F;virtio_blk.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;block&#x2F;zram&#x2F;zram.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;bluetooth&#x2F;btbcm.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;bluetooth&#x2F;btqca.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -39,16 +39,16 @@ _COMMON_GKI_MODULES_LIST = [
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;net&#x2F;usb&#x2F;rtl8150.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;net&#x2F;usb&#x2F;usbnet.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;net&#x2F;wwan&#x2F;wwan.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;pps&#x2F;pps_core.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;ptp&#x2F;ptp.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;pps&#x2F;pps_core.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;ptp&#x2F;ptp.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;usb&#x2F;class&#x2F;cdc-acm.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;usb&#x2F;mon&#x2F;usbmon.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;usb&#x2F;serial&#x2F;ftdi_sio.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;usb&#x2F;serial&#x2F;usbserial.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;virtio&#x2F;virtio_balloon.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;virtio&#x2F;virtio_pci.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;virtio&#x2F;virtio_pci_legacy_dev.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;virtio&#x2F;virtio_pci_modern_dev.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;virtio&#x2F;virtio_balloon.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;virtio&#x2F;virtio_pci.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;virtio&#x2F;virtio_pci_legacy_dev.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;virtio&#x2F;virtio_pci_modern_dev.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;kernel&#x2F;kheaders.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;lib&#x2F;crypto&#x2F;libarc4.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;mm&#x2F;zsmalloc.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -61,8 +61,8 @@ _COMMON_GKI_MODULES_LIST = [
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;net&#x2F;6lowpan&#x2F;nhc_routing.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;net&#x2F;6lowpan&#x2F;nhc_udp.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;net&#x2F;8021q&#x2F;8021q.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;net&#x2F;9p&#x2F;9pnet.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;net&#x2F;9p&#x2F;9pnet_fd.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;net&#x2F;9p&#x2F;9pnet.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;net&#x2F;9p&#x2F;9pnet_fd.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;net&#x2F;bluetooth&#x2F;bluetooth.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;net&#x2F;bluetooth&#x2F;hidp&#x2F;hidp.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;net&#x2F;bluetooth&#x2F;rfcomm&#x2F;rfcomm.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -97,7 +97,7 @@ _ARM64_GKI_MODULES_LIST = [
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;arch&#x2F;arm64&#x2F;geniezone&#x2F;gzvm.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;char&#x2F;hw_random&#x2F;cctrng.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &amp;quot;drivers&#x2F;misc&#x2F;open-dice.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-    &amp;quot;drivers&#x2F;ptp&#x2F;ptp_kvm.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+    # &amp;quot;drivers&#x2F;ptp&#x2F;ptp_kvm.ko&amp;quot;,
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;build&quot;&gt;Build&lt;&#x2F;h1&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;tools&#x2F;bazel&lt;&#x2F;span&gt;&lt;span&gt; run &#x2F;&#x2F;common:kernel_aarch64_dist
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;create-rootfs&quot;&gt;Create rootfs&lt;&#x2F;h1&gt;
+&lt;p&gt;&lt;strong&gt;WIP&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;boot&quot;&gt;Boot&lt;&#x2F;h1&gt;
+&lt;pre data-lang=&quot;sh&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-sh &quot;&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;qemu-system-aarch64 &lt;&#x2F;span&gt;&lt;span&gt;\
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -m&lt;&#x2F;span&gt;&lt;span&gt; 2048 \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -smp&lt;&#x2F;span&gt;&lt;span&gt; 2 \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -machine&lt;&#x2F;span&gt;&lt;span&gt; virt \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -cpu&lt;&#x2F;span&gt;&lt;span&gt; cortex-a57 \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -display&lt;&#x2F;span&gt;&lt;span&gt; none \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -serial&lt;&#x2F;span&gt;&lt;span&gt; stdio \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -no-reboot &lt;&#x2F;span&gt;&lt;span&gt;\
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -device&lt;&#x2F;span&gt;&lt;span&gt; virtio-rng-pci \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -cpu&lt;&#x2F;span&gt;&lt;span&gt; coretex-a57 \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -device&lt;&#x2F;span&gt;&lt;span&gt; e1000,netdev=net0 \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -netdev&lt;&#x2F;span&gt;&lt;span&gt; user,id=net0,restrict=on,hostfwd=tcp::20022-:22 \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -drive&lt;&#x2F;span&gt;&lt;span&gt; file=.&#x2F;rootfs.ext2,if=virtio,format=raw,cache=none \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -snapshot &lt;&#x2F;span&gt;&lt;span&gt;\
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -kernel&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;Image \
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;        -append &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;rdinit=&#x2F;linuxrc console=ttyAMA0 root=&#x2F;dev&#x2F;vda verbose&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+</feed>
