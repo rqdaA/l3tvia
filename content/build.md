@@ -38,10 +38,10 @@ strings bzImage | grep -E '[0-9]+\.[0-9]+\.[0-9]+'
 ### Linuxソースのclone
 
 ```sh
-git clone git@github.com:gregkh/linux.git
+git clone https://github.com/gregkh/linux.git -b linux-6.6.y
 cd linux
-git fetch --tags origin linux-6.6.y:linux6.6.y
-git checkout v6.6.56
+git fetch --tags origin linux-6.6.y:linux-6.6.y
+git checkout v6.6.77
 ```
 
 ### デバッグシンボルをつけてビルド
