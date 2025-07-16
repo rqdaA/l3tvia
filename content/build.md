@@ -5,7 +5,7 @@ date = 2024-10-17T15:00:00Z
 draft = false
 
 [taxonomies]
-tags = ["Setup","Kernl Exploit"]
+tags = ["Setup","Kernel Exploit"]
 [extra]
 toc = true
 series = "Setup"
