@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://l3tvia.rqda.wtf/js/theme.min.js" integrity="sha384-pb++s6uBRKaQv+iAXpgA/H3IlpLZdO14tTwuCI7uXmz4aaZdByoCcM+6BhynMq/1"></script>
+  <link rel="stylesheet" href="https://l3tvia.rqda.wtf/abridge.css?h=2dcd8720d5405384ca5d" />
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="base" content="https://l3tvia.rqda.wtf" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#333333" />
+  <meta name="msapplication-TileColor" content="#333333" />
+  <link rel="manifest" href="https://l3tvia.rqda.wtf/manifest.min.json" />
+  <link rel="icon" type="image/svg+xml" href="https://l3tvia.rqda.wtf/favicon.svg" />
+  <link rel="preload" as="font" href="https://l3tvia.rqda.wtf/fonts/HackGen35-Regular.ttf" type="font/woff2" />
+  <link rel="preload" as="style" class="preStyle" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="alternate" type="application/atom+xml" title="L3tvia Atom Feed" href="https://l3tvia.rqda.wtf/atom.xml" />
+  <meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <title>Kernel Exploit環境構築 / L3tvia</title>
+  <meta name="author" content="Rona" />
+  <meta name="copyright" content="L3tvia" />
+  <meta name="description" content="Kernelのビルドとソースコードリーディングの環境構築" />
+  <link rel="canonical" href="https://l3tvia.rqda.wtf/build/" />
+  <meta name="keywords" content="Kernel exploit, exploit, pwn, ctf, ROP, Privilege escalation, rona, vulnerability, vulns" />
+  <meta property="og:url" content="https://l3tvia.rqda.wtf/build/" />
+  <meta name="twitter:url" content="https://l3tvia.rqda.wtf/build/" />
+  <meta property="og:description" content="Kernelのビルドとソースコードリーディングの環境構築" />
+  <meta name="twitter:description" content="Kernelのビルドとソースコードリーディングの環境構築" />
+  <meta property="og:title" content="Kernel Exploit環境構築 | L3tvia" />
+  <meta name="twitter:title" content="Kernel Exploit環境構築 | L3tvia" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="L3tvia" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2024-10-17" />
+  <script defer src="https://l3tvia.rqda.wtf/js/abridge.min.js?h=e0f9a881a665c86cce9c" integrity="sha384-QF67y7RnPkuDrJNQqn3/7nYxqxWkW/qHI7zN0WTES1aXbf+TotoByRBb835fUE6U"></script>
+  <noscript><link rel="stylesheet" href="https://l3tvia.rqda.wtf/nojs.css" /></noscript>
+</head>
+<body>
+  <header>
+    <nav>
+      <div><big><a href="https://l3tvia.rqda.wtf" title="L3tvia"><font color="#f90">L</font>3tvia</a></big></div>
+      <div>
+
+        <div>
+          <ul><li><a class="s110" href="https://l3tvia.rqda.wtf/archive/"> Posts </a></li><li><a class="s110" href="https://l3tvia.rqda.wtf/tags/"> Tags </a></li><li><i type="reset" id="mode" class="js svgs adjust"></i></ul>
+        </div>
+
+        <div>
+          <div>
+            <form autocomplete=off class="js" name="goSearch" id="searchbox">
+              <div class="searchd">
+                <input id="searchinput" type="text" placeholder="Search" title="Search" />
+                <button type="submit" title="Search" class="svgs svgm search"></button>
+              </div>
+              <div class="results"><div id="suggestions"></div></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+  <main>
+    <article>
+      <h1><a href="https://l3tvia.rqda.wtf/build/">Kernel Exploit環境構築</a></h1>
+
+      <span class="s95"><i class="svgs fa-solid fa-pen-fancy"></i>  Rona <span class="rpad"></span><i class="svgs fa-solid fa-calendar"></i>  October 17, 2024 <span class="rpad"></span> #<a href="https://l3tvia.rqda.wtf/tags/setup/">Setup</a>  #<a href="https://l3tvia.rqda.wtf/tags/kernel-exploit/">Kernel Exploit</a> </span>
+
+    
+        <div class="block">
+      <div class="blockdiv">
+        <a class="b s150" href="https://l3tvia.rqda.wtf/tags/setup/">Setup (Series)</a><br>
+            <a class="scur" href="https://l3tvia.rqda.wtf/build/">Kernel Exploit環境構築</a><br> 
+          
+            <a href="https://l3tvia.rqda.wtf/build-aosp/">How to Build Android 15 arm64 for QEMU</a><br>
+      </div>
+    </div>
+
+
+<h2 id="xiang-ding-huan-jing">想定環境</h2>
+<ul>
+<li>OS: Ubuntu 22.04</li>
+</ul>
+<h2 id="kanerunobirudotososukodorideingunohuan-jing-zheng-bei">カーネルのビルドとソースコードリーディングの環境整備</h2>
+<h3 id="gccwozui-xin-nisuru">GCCを最新にする</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">sudo</span><span> add-apt-repository ppa:ubuntu-toolchain-r/test
+</span><span style="color:#50fa7b;">sudo</span><span> apt-get update
+</span><span style="color:#50fa7b;">sudo</span><span> apt-get install gcc-13 g++-13
+</span><span style="color:#50fa7b;">sudo</span><span> update-alternatives</span><span style="font-style:italic;color:#ffb86c;"> --install</span><span> /usr/bin/gcc gcc /usr/bin/gcc-13 100</span><span style="font-style:italic;color:#ffb86c;"> --slave</span><span> /usr/bin/g++ g++ /usr/bin/g++-13
+</span></code></pre>
+<h3 id="ti-gong-huairunobaziyonque-ren">提供ファイルのバージョン確認</h3>
+<p>以下を実行しカーネルのバージョンを特定する</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#8be9fd;">cd</span><span> /path/to/ctf
+</span><span style="color:#50fa7b;">strings</span><span> bzImage </span><span style="color:#ff79c6;">| </span><span style="color:#50fa7b;">grep</span><span style="font-style:italic;color:#ffb86c;"> -E </span><span style="color:#f1fa8c;">&#39;[0-9]+\.[0-9]+\.[0-9]+&#39;
+</span></code></pre>
+<h3 id="linuxsosunoclone">Linuxソースのclone</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">git</span><span> clone https://github.com/gregkh/linux.git</span><span style="font-style:italic;color:#ffb86c;"> -b</span><span> linux-6.6.y
+</span><span style="color:#8be9fd;">cd</span><span> linux
+</span><span style="color:#50fa7b;">git</span><span> fetch</span><span style="font-style:italic;color:#ffb86c;"> --tags</span><span> origin linux-6.6.y:linux-6.6.y
+</span><span style="color:#50fa7b;">git</span><span> checkout v6.6.77
+</span></code></pre>
+<h3 id="debatugusinboruwotuketebirudo">デバッグシンボルをつけてビルド</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#6272a4;"># 依存パッケージのインストール
+</span><span style="color:#50fa7b;">sudo</span><span> apt install libncurses-dev gawk flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf llvm bear dwarves cpio bc
+</span></code></pre>
+<h4 id="dehuorutodebirudosuruchang-he">- デフォルトでビルドする場合</h4>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">make</span><span> alldefconfig </span><span style="color:#ff79c6;">&amp;&amp; </span><span style="color:#50fa7b;">make</span><span> menuconfig
+</span></code></pre>
+<h4 id="confighuairugati-gong-sareteiruchang-he">- configファイルが提供されている場合</h4>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">cp</span><span> /path/to/ctf/config .config
+</span><span style="color:#50fa7b;">make</span><span> olddefconfig </span><span style="color:#ff79c6;">&amp;&amp; </span><span style="color:#50fa7b;">make</span><span> menuconfig
+</span></code></pre>
+<hr />
+<p>以下のコンフィグをオンにする</p>
+<ul>
+<li><code>CONFIG_8250</code>,<code>CONFIG_8250_CONSOLE</code>: ログを出力させるために必要</li>
+<li><code>CONFIG_BLK_DEV_INITRD</code>: rootfs(initramfs)のマウントに必要</li>
+<li><code>CONFIG_DEVTMPFS</code>,<code>CONFIG_DEVTMPFS_MOUNT</code>: /devの自動マウント</li>
+<li><code>CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT</code>: シンボル付きvmlinuxを吐く</li>
+<li><code>CONFIG_BINFMT_SCRIPT</code>,<code>CONFIG_BINFMT_MISC</code>: エクスプロイトでよく使うmodprobeを有効化</li>
+</ul>
+<p>ビルド(5分くらいかかる)</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">bear</span><span style="color:#ff79c6;"> --</span><span> make -j$(</span><span style="color:#50fa7b;">nproc</span><span>) bzImage vmlinux
+</span></code></pre>
+<p><code>/vmlinux</code>がデバッグシンボル付きのカーネルイメージで<code>/arch/x86/boot/bzImage</code>がカーネルなのでこれを問題ファイルにコピー</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">mv</span><span> vmlinux /path/to/ctf/vmlinux.own
+</span><span style="color:#50fa7b;">mv</span><span> bzImage /path/to/ctf/bzImage.own
+</span></code></pre>
+<h3 id="sosukodorideingu">ソースコードリーディング</h3>
+<h4 id="clionnochang-he">- CLionの場合</h4>
+<ol>
+<li>初期画面からopenを選択</li>
+<li><code>/compile_commands.json</code>を選択</li>
+<li>Open as Projectを選択</li>
+</ol>
+<h4 id="vscodenochang-he">- VSCodeの場合</h4>
+<p><a rel="noopener" target="_blank" href="https://p3land.smallkirby.com/kernel/prepare">https://p3land.smallkirby.com/kernel/prepare</a> を読むといいらしい(VSCodeを使ってないので詳しくはわからない)</p>
+<h2 id="turulei-noinsutoru">ツール類のインストール</h2>
+<h3 id="lysithea">lysithea</h3>
+<p>お好きな場所で</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">git</span><span> clone git@github.com:smallkirby/lysithea.git
+</span></code></pre>
+<h3 id="vermagic">vermagic</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">git@github.com:yaxinsn/vermagic.git
+</span><span style="color:#8be9fd;">cd</span><span> vermagic
+</span><span style="color:#50fa7b;">make</span><span style="font-style:italic;color:#ffb86c;"> -j$(</span><span style="color:#50fa7b;">nproc</span><span style="font-style:italic;color:#ffb86c;">)
+</span></code></pre>
+<h3 id="gef">gef</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">wget</span><span style="font-style:italic;color:#ffb86c;"> -q</span><span> https://raw.githubusercontent.com/bata24/gef/dev/install.sh</span><span style="font-style:italic;color:#ffb86c;"> -O- </span><span style="color:#ff79c6;">| </span><span style="color:#50fa7b;">sudo</span><span> sh
+</span></code></pre>
+<h3 id="qemu">QEMU</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">sudo</span><span> apt install qemu-system qemu-system-common qemu-utils
+</span></code></pre>
+<h3 id="pasuhenozhui-jia">パスへの追加</h3>
+<p>bashrcに以下を追加</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#ff79c6;">export </span><span style="color:#ffffff;">PATH</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;$</span><span style="color:#ffffff;">PATH</span><span style="color:#f1fa8c;">:/path/to/lysithea&quot;
+</span><span style="color:#ff79c6;">export </span><span style="color:#ffffff;">PATH</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;$</span><span style="color:#ffffff;">PATH</span><span style="color:#f1fa8c;">:/path/to/vermagic&quot;
+</span></code></pre>
+<h2 id="wen-ti-wojie-ku">問題を解く</h2>
+<p>一般に以下のファイルが提供される</p>
+<ul>
+<li><code>bzImage</code>: カーネル</li>
+<li><code>rootfs.cpio</code> or <code>initramfs.cpio</code>: rootファイルシステム</li>
+<li><code>[name].ko</code>: カーネルオブジェクト</li>
+<li><code>run.sh</code>: 実行するためのシェルスクリプト</li>
+</ul>
+<p>追加でこれらのファイルが提供されていると嬉しい</p>
+<ul>
+<li><code>.config</code>: ビルドコンフィグ</li>
+<li><code>[name].c</code>: カーネルオブジェクトのソースコード</li>
+</ul>
+<h3 id="deirekutorinochu-qi-hua">ディレクトリの初期化</h3>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#8be9fd;">cd</span><span> /path/to/ctf
+</span><span style="color:#50fa7b;">lysithea</span><span> init
+</span><span style="color:#50fa7b;">lysithea</span><span> extract
+</span></code></pre>
+<p><code>extract</code>ディレクトリにrootfsの内容が展開される。まずはデバッグようにルートでシェルを得られるようにする</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">grep</span><span style="font-style:italic;color:#ffb86c;"> -r </span><span style="color:#f1fa8c;">&#39;setsid cttyhack setuidgid &#39;</span><span> extracted
+</span></code></pre>
+<p>を実行し出てきたファイルがCTF用の初期化ファイルである。そのファイルの中身を以下のように書き換える</p>
+<pre data-lang="diff" style="background-color:#282a36;color:#f8f8f2;" class="language-diff "><code class="language-diff" data-lang="diff"><span style="color:#ff79c6;">- setsid cttyhack setuidgid 9999 sh
+</span><span style="color:#50fa7b;">+ setsid cttyhack setuidgid 0 sh
+</span><span>...
+</span><span style="color:#ff79c6;">- echo 2 &gt; /proc/sys/kernel/kptr_restrict
+</span><span style="color:#50fa7b;">+ echo 0 &gt; /proc/sys/kernel/kptr_restrict
+</span><span>...
+</span><span style="color:#ff79c6;">- echo 1 &gt; /proc/sys/kernel/dmesg_restrict
+</span><span style="color:#50fa7b;">+ echo 0 &gt;/proc/sys/kernel/dmesg_restrict
+</span></code></pre>
+<h3 id="kaslrnowu-xiao-hua">KASLRの無効化</h3>
+<p><code>run.sh.dev</code>を以下のように変更</p>
+<pre data-lang="diff" style="background-color:#282a36;color:#f8f8f2;" class="language-diff "><code class="language-diff" data-lang="diff"><span style="color:#ff79c6;">- -kernel ./bzImage
+</span><span style="color:#50fa7b;">+ -kernel ./bzImage.own
+</span><span>...
+</span><span style="color:#ff79c6;">- -append &quot;console=ttyS0 kaslr quiet
+</span><span style="color:#50fa7b;">+ -append &quot;console=ttyS0 nokaslr verbose
+</span><span>...
+</span><span style="color:#50fa7b;">+ -s
+</span></code></pre>
+<h3 id="shi-xing">実行</h3>
+<p>以下のコマンドが<code>exploit</code>のコンパイルと便利ファイルの追加をした上で、<code>extracted</code>の圧縮を行い、<code>run.sh.dev</code>を実行してくれる</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">lysithea</span><span> local
+</span></code></pre>
+<p>ここで、別タブでgdbを起動してアタッチするとカーネルの動きが追える</p>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">sudo</span><span> gdb vmlinux.own
+</span><span>
+</span><span style="color:#50fa7b;">gef</span><span style="color:#ff79c6;">&gt;</span><span> target remote:1234
+</span><span style="color:#50fa7b;">gef</span><span style="color:#ff79c6;">&gt;</span><span> directory /path/to/linux </span><span style="color:#6272a4;"># ソースコードの表示
+</span></code></pre>
+<p><img src="/image/build_result.png" alt="image" /></p>
+<h2 id="toraburusiyuteingu">トラブルシューティング</h2>
+<h3 id="invalid-module-formattoiueragachu-tachang-he"><code>Invalid module format</code>というエラーが出た場合</h3>
+<p><code>linux/include/linux/vermagic.h</code>を確認して必要なビルドオプションをつけて再度ビルドする</p>
+<h4 id="li">例:</h4>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">strings </span><span style="color:#ff79c6;">[</span><span>chal</span><span style="color:#ff79c6;">]</span><span>.ko </span><span style="color:#ff79c6;">| </span><span style="color:#50fa7b;">grep</span><span style="font-style:italic;color:#ffb86c;"> -E </span><span style="color:#f1fa8c;">&#39;[0-9]+\.[0-9]+\.[0-9]+&#39;
+</span></code></pre>
+<p>を実行して、<code>6.6.58 SMP preempt mod_unload</code>が出てきたとする</p>
+<ul>
+<li><code>CONFIG_SMP=y</code></li>
+<li><code>CONFIG_PREEMPT_BUILD=y</code></li>
+<li><code>CONFIG_MODULE_UNLOAD=y</code></li>
+<li><code>CONFIG_MODVERSIONS=n</code></li>
+<li><code>RANDSTRUCT_NONE=y</code></li>
+</ul>
+<p>上記のコンフィグを設定してカーネルを再度ビルド</p>
+<h2 id="can-kao-wen-xian">参考文献</h2>
+<ul>
+<li><a rel="noopener" target="_blank" href="https://p3land.smallkirby.com/kernel/">p3land (セクキャンの講義資料)</a></li>
+<li><a rel="noopener" target="_blank" href="https://hackmd.io/@bata24/ryWzOHEMw">qemu 各種アーキ環境構築</a></li>
+<li><a rel="noopener" target="_blank" href="https://hackmd.io/@t3mp/H1jTrjTp2">Linux Kernel Debug Enviroment with buildroot</a></li>
+</ul>
+
+      <nav>
+        <div>
+          <a href="https://l3tvia.rqda.wtf/book56/">&#8249; WORD56号</a>
+        </div>
+        <div>
+        </div>
+      </nav>
+    </article>
+
+    <div class="sblock">
+      <div class="blockdiv">
+        <a class="b s150" href="https://l3tvia.rqda.wtf/tags/setup/">Series</a><br>
+            
+      <a class="scur" href="https://l3tvia.rqda.wtf/build/">Kernel Exploit環境構築</a><br>
+    
+            
+      <a href="https://l3tvia.rqda.wtf/build-aosp/">How to Build Android 15 arm64 for QEMU</a><br>
+      </div>
+      <div class="blockdiv sticky">
+        <a class="b s150" href="#">Index</a>
+        <div>
+          <a href="#xiang-ding-huan-jing">想定環境</a>
+        </div>
+        <div>
+          <a href="#kanerunobirudotososukodorideingunohuan-jing-zheng-bei">カーネルのビルドとソースコードリーディングの環境整備</a>
+        </div>
+        <div class="hpad">
+          <a href="#gccwozui-xin-nisuru"><small>- GCCを最新にする</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#ti-gong-huairunobaziyonque-ren"><small>- 提供ファイルのバージョン確認</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#linuxsosunoclone"><small>- Linuxソースのclone</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#debatugusinboruwotuketebirudo"><small>- デバッグシンボルをつけてビルド</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#sosukodorideingu"><small>- ソースコードリーディング</small></a>
+        </div>
+        <div>
+          <a href="#turulei-noinsutoru">ツール類のインストール</a>
+        </div>
+        <div class="hpad">
+          <a href="#lysithea"><small>- lysithea</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#vermagic"><small>- vermagic</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#gef"><small>- gef</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#qemu"><small>- QEMU</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#pasuhenozhui-jia"><small>- パスへの追加</small></a>
+        </div>
+        <div>
+          <a href="#wen-ti-wojie-ku">問題を解く</a>
+        </div>
+        <div class="hpad">
+          <a href="#deirekutorinochu-qi-hua"><small>- ディレクトリの初期化</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#kaslrnowu-xiao-hua"><small>- KASLRの無効化</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#shi-xing"><small>- 実行</small></a>
+        </div>
+        <div>
+          <a href="#toraburusiyuteingu">トラブルシューティング</a>
+        </div>
+        <div class="hpad">
+          <a href="#invalid-module-formattoiueragachu-tachang-he"><small>- Invalid module formatというエラーが出た場合</small></a>
+        </div>
+        <div>
+          <a href="#can-kao-wen-xian">参考文献</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="c">
+      <nav class="tpad"><div><a class="js m-protected" href="#bmFtZUBleGFtcGxlLmNvbQ==" target="_blank" title="Mail"><i type="Button" class="svg mail" title="Mail"></i></a><a href="https://mastodon.example.com/@username" target="_blank" title="Mastodon" rel="me"><i type="Button" class="svg mastodon" title="Mastodon"></i></a><a href="https://matrix.example.com/" target="_blank" title="Element"><i type="Button" class="svg element" title="Element"></i></a><a href="https://github.com/your-user-name/" target="_blank" title="Github"><i type="Button" class="svg github" title="Github"></i></a><a href="https://www.instagram.com/your-user-name/" target="_blank" title="Instagram"><i type="Button" class="svg instagram" title="Instagram"></i></a><a href="https://www.youtube.com/channel&#x2F;your-channel-id" target="_blank" title="YouTube"><i type="Button" class="svg youtube" title="YouTube"></i></a><a href="https://www.twitch.tv/your-user-name/" target="_blank" title="Twitch"><i type="Button" class="svg twitch" title="Twitch"></i></a><a href="https://www.ko-fi.com/your-user-name/" target="_blank" title="Support me on Ko-fi"><i type="Button" class="svg kofi" title="Support me on Ko-fi"></i></a></div></nav>
+      <nav class="vpad">
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/about/"> About </a>
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/contact/"> Contact </a>
+        <a class="rpad s90" href="https://github.com/rqdaA/l3tvia"> Repository </a>
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/atom.xml" target="_blank"> RSS </a>
+      </nav>
+      <p class="s80"> &copy; <span id="year">2025</span> L3tvia</p>
+      <p class="s80">Powered by <a href="https://www.getzola.org/" target="_blank">Zola</a> and <a href="https://github.com/jieiku/abridge/" target="_blank">Abridge</a></p>
+    </div>
+  </footer><span class="topout">
+<span class="topleft"> </span><a href="#" class="top" title="Back to Top"><i class="svgs svgh angu"></i></a>
+</span>
+</body>
+</html>

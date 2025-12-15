@@ -1,0 +1,665 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://l3tvia.rqda.wtf/js/theme.min.js" integrity="sha384-pb++s6uBRKaQv+iAXpgA/H3IlpLZdO14tTwuCI7uXmz4aaZdByoCcM+6BhynMq/1"></script>
+  <link rel="stylesheet" href="https://l3tvia.rqda.wtf/abridge.css?h=2dcd8720d5405384ca5d" />
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="base" content="https://l3tvia.rqda.wtf" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#333333" />
+  <meta name="msapplication-TileColor" content="#333333" />
+  <link rel="manifest" href="https://l3tvia.rqda.wtf/manifest.min.json" />
+  <link rel="icon" type="image/svg+xml" href="https://l3tvia.rqda.wtf/favicon.svg" />
+  <link rel="preload" as="font" href="https://l3tvia.rqda.wtf/fonts/HackGen35-Regular.ttf" type="font/woff2" />
+  <link rel="preload" as="style" class="preStyle" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="alternate" type="application/atom+xml" title="L3tvia Atom Feed" href="https://l3tvia.rqda.wtf/atom.xml" />
+  <meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <title>XNUのpage fault handlerを読む / L3tvia</title>
+  <meta name="author" content="Rona" />
+  <meta name="copyright" content="L3tvia" />
+  <meta name="description" content="coins advent calendar 11日目の記事" />
+  <link rel="canonical" href="https://l3tvia.rqda.wtf/coins-adc-2026/" />
+  <meta name="keywords" content="Kernel exploit, exploit, pwn, ctf, ROP, Privilege escalation, rona, vulnerability, vulns" />
+  <meta property="og:url" content="https://l3tvia.rqda.wtf/coins-adc-2026/" />
+  <meta name="twitter:url" content="https://l3tvia.rqda.wtf/coins-adc-2026/" />
+  <meta property="og:description" content="coins advent calendar 11日目の記事" />
+  <meta name="twitter:description" content="coins advent calendar 11日目の記事" />
+  <meta property="og:title" content="XNUのpage fault handlerを読む | L3tvia" />
+  <meta name="twitter:title" content="XNUのpage fault handlerを読む | L3tvia" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="L3tvia" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2025-12-11" />
+  <script defer src="https://l3tvia.rqda.wtf/js/abridge.min.js?h=e0f9a881a665c86cce9c" integrity="sha384-QF67y7RnPkuDrJNQqn3/7nYxqxWkW/qHI7zN0WTES1aXbf+TotoByRBb835fUE6U"></script>
+  <noscript><link rel="stylesheet" href="https://l3tvia.rqda.wtf/nojs.css" /></noscript>
+</head>
+<body>
+  <header>
+    <nav>
+      <div><big><a href="https://l3tvia.rqda.wtf" title="L3tvia"><font color="#f90">L</font>3tvia</a></big></div>
+      <div>
+
+        <div>
+          <ul><li><a class="s110" href="https://l3tvia.rqda.wtf/archive/"> Posts </a></li><li><a class="s110" href="https://l3tvia.rqda.wtf/tags/"> Tags </a></li><li><i type="reset" id="mode" class="js svgs adjust"></i></ul>
+        </div>
+
+        <div>
+          <div>
+            <form autocomplete=off class="js" name="goSearch" id="searchbox">
+              <div class="searchd">
+                <input id="searchinput" type="text" placeholder="Search" title="Search" />
+                <button type="submit" title="Search" class="svgs svgm search"></button>
+              </div>
+              <div class="results"><div id="suggestions"></div></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+  <main>
+    <article>
+      <h1><a href="https://l3tvia.rqda.wtf/coins-adc-2026/">XNUのpage fault handlerを読む</a></h1>
+
+      <span class="s95"><i class="svgs fa-solid fa-pen-fancy"></i>  Rona <span class="rpad"></span><i class="svgs fa-solid fa-calendar"></i>  December 11, 2025 <span class="rpad"></span> #<a href="https://l3tvia.rqda.wtf/tags/xnu/">xnu</a> </span>
+
+    
+
+
+<p>この記事は<a rel="noopener" target="_blank" href="https://adventar.org/calendars/11747">coins advent calendar</a>の11日目の記事です。</p>
+<p>10日目はベアさんの<a rel="noopener" target="_blank" href="https://qiita.com/bear_wash/items/c6fc08bc8714df9d1a44">会社に100万円のPCが落ちていたのでwindows消してLocalLLM構築してみた</a>でした。RTX 5000 Adaを使ってLLMを動かすのはロマンがありますね。</p>
+<p>11日目はゃーさんの記事です。</p>
+<h3 id="zhui-ji">追記</h3>
+<p>ゃーさんの記事はこちらです。</p>
+<p><a rel="noopener" target="_blank" href="https://reversed-r.dev/articles/2025-12-12-coins-advent-calendar-install-openmediavault-to-buffalo-linkstation-nas/">https://reversed-r.dev/articles/2025-12-12-coins-advent-calendar-install-openmediavault-to-buffalo-linkstation-nas/</a></p>
+<hr />
+<p>以下では、xnuのversionは<code>xnu-11417.140.69</code>を前提とします。</p>
+<p>このversionは<code>MacOS Sequoia 15.6</code>で使われています。ソースコードのダウンロードは以下から行ってください。</p>
+<ul>
+<li><a rel="noopener" target="_blank" href="https://opensource.apple.com/releases/">https://opensource.apple.com/releases/</a></li>
+<li><a rel="noopener" target="_blank" href="https://github.com/apple-oss-distributions/xnu/tree/xnu-11417.140.69">https://github.com/apple-oss-distributions/xnu/tree/xnu-11417.140.69</a></li>
+</ul>
+<h1 id="fault-handler">Fault Handler</h1>
+<p>fault handlerは、CPUが例外を起こしたときに呼ばれるOS側の処理ルーチンのことです。
+このうち、page fault handlerとは、仮想アドレスは割り当てられているが、物理ページが存在しないアドレスにアクセスしたときに投げられる例外(page fault)を処理するルーチンのことです。</p>
+<p>例えば、以下のようなコードを実行したときにpage faultが発生し、page fault handlerが呼び出されます。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#ff79c6;">#include </span><span style="color:#f1fa8c;">&lt;sys/mman.h&gt;
+</span><span style="color:#ff79c6;">#include </span><span style="color:#f1fa8c;">&lt;unistd.h&gt;
+</span><span>
+</span><span style="font-style:italic;color:#8be9fd;">void </span><span style="color:#50fa7b;">main</span><span>() </span><span style="color:#ffffff;">{
+</span><span>    </span><span style="font-style:italic;color:#8be9fd;">char</span><span style="color:#ff79c6;">*</span><span> ptr </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mmap</span><span>(</span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#50fa7b;">getpagesize</span><span>(), PROT_READ </span><span style="color:#ff79c6;">|</span><span> PROT_WRITE, MAP_ANON </span><span style="color:#ff79c6;">|</span><span> MAP_PRIVATE, </span><span style="color:#ff79c6;">-</span><span style="color:#bd93f9;">1</span><span>, </span><span style="color:#bd93f9;">0</span><span>);
+</span><span>    ptr[</span><span style="color:#bd93f9;">0</span><span>] </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&#39;A&#39;</span><span>;
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p>この例では、<code>mmap</code>を利用して1page分の仮想アドレスを新たに割り当てて、そのpageに<code>'A'</code>という文字列を書き込んでいます。
+mmapを呼び出した時点では、仮想アドレスを割り当てただけで、まだ実際の物理ページ(=メモリ)は割り当てられていません。その後、<code>'A'</code>を書き込んだとき、すなわちpage faultが発生したときに、初めて物理メモリをこのアドレスに割り当てます。</p>
+<p>この記事では、xnuがどのようにpage faultを処理しているかを見ていきます。</p>
+<h2 id="idtnosetutoatupu">IDTのセットアップ</h2>
+<p>ユーザーランドでpage faultが発生すると、IDTを経由してkernel-landへ入ります。</p>
+<p>IDTとは、(大雑把に言うと)ある例外が発生したときどの関数がその処理を行うかが書かれているものです。<br />
+詳しくは<a href="https://l3tvia.rqda.wtf/coins-adc-2026/%5Bhttps://wiki.osdev.org/Interrupt_Descriptor_Table%5D">https://wiki.osdev.org/Interrupt_Descriptor_Table</a>を参照してください。</p>
+<p>xnuのソースコードでは<code>osfmk/i386/i386_init.c</code>で初期化が行われています。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#ff79c6;">__attribute__</span><span>((noreturn))
+</span><span style="font-style:italic;color:#8be9fd;">void
+</span><span style="color:#50fa7b;">vstart</span><span>(vm_offset_t </span><span style="font-style:italic;color:#ffb86c;">boot_args_start</span><span>)
+</span><span style="color:#ffffff;">{
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span>        </span><span style="color:#50fa7b;">cpu_desc_init</span><span>(</span><span style="color:#50fa7b;">cpu_datap</span><span>(</span><span style="color:#bd93f9;">0</span><span>));
+</span><span>        </span><span style="color:#50fa7b;">cpu_desc_load</span><span>(</span><span style="color:#50fa7b;">cpu_datap</span><span>(</span><span style="color:#bd93f9;">0</span><span>));
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span style="color:#ffffff;">}
+</span><span>
+</span><span style="color:#ff79c6;">extern </span><span style="font-style:italic;color:#8be9fd;">unsigned</span><span> mldtsz;
+</span><span style="font-style:italic;color:#8be9fd;">void
+</span><span style="color:#50fa7b;">cpu_desc_init</span><span>(cpu_data_t </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">cdp</span><span>)
+</span><span style="color:#ffffff;">{
+</span><span>    cpu_desc_index_t        </span><span style="color:#ff79c6;">*</span><span>cdi </span><span style="color:#ff79c6;">= &amp;</span><span>cdp</span><span style="color:#ff79c6;">-&gt;</span><span>cpu_desc_index;
+</span><span>
+</span><span>    </span><span style="color:#ff79c6;">if </span><span>(cdp </span><span style="color:#ff79c6;">==</span><span> cpu_data_master) </span><span style="color:#ffffff;">{
+</span><span>        </span><span style="color:#6272a4;">// snip
+</span><span>        cdi</span><span style="color:#ff79c6;">-&gt;</span><span>cdi_idtu</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">ptr  </span><span style="color:#ff79c6;">= </span><span>(</span><span style="font-style:italic;color:#8be9fd;">void </span><span style="color:#ff79c6;">*</span><span>)</span><span style="color:#50fa7b;">DBLMAP</span><span>((</span><span style="font-style:italic;color:#66d9ef;">uintptr_t</span><span>) </span><span style="color:#ff79c6;">&amp;</span><span>master_idt64);
+</span><span>        cdi</span><span style="color:#ff79c6;">-&gt;</span><span>cdi_idtb</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">ptr  </span><span style="color:#ff79c6;">= </span><span>(</span><span style="font-style:italic;color:#8be9fd;">void </span><span style="color:#ff79c6;">*</span><span>)((</span><span style="font-style:italic;color:#66d9ef;">uintptr_t</span><span>) </span><span style="color:#ff79c6;">&amp;</span><span>master_idt64);
+</span><span>        </span><span style="color:#6272a4;">// snip
+</span><span style="color:#ffffff;">}
+</span><span>
+</span><span>
+</span><span style="font-style:italic;color:#8be9fd;">void
+</span><span style="color:#50fa7b;">cpu_desc_load</span><span>(cpu_data_t </span><span style="color:#ff79c6;">*</span><span>cdp)
+</span><span style="color:#ffffff;">{
+</span><span>    cpu_desc_index_t        </span><span style="color:#ff79c6;">*</span><span>cdi </span><span style="color:#ff79c6;">= &amp;</span><span>cdp</span><span style="color:#ff79c6;">-&gt;</span><span>cpu_desc_index;
+</span><span>
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span>    cdi</span><span style="color:#ff79c6;">-&gt;</span><span>cdi_idtb</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">size </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">0x1000 </span><span style="color:#ff79c6;">+</span><span> cdp</span><span style="color:#ff79c6;">-&gt;</span><span>cpu_number;
+</span><span>    cdi</span><span style="color:#ff79c6;">-&gt;</span><span>cdi_idtu</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">size </span><span style="color:#ff79c6;">=</span><span> cdi</span><span style="color:#ff79c6;">-&gt;</span><span>cdi_idtb</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">size</span><span>;
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span>    </span><span style="color:#50fa7b;">lidt</span><span>((</span><span style="font-style:italic;color:#66d9ef;">uintptr_t </span><span style="color:#ff79c6;">*</span><span>) </span><span style="color:#ff79c6;">&amp;</span><span>cdi</span><span style="color:#ff79c6;">-&gt;</span><span>cdi_idtu);
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span style="color:#ffffff;">}
+</span><span>
+</span><span style="color:#ff79c6;">static inline </span><span style="font-style:italic;color:#8be9fd;">void
+</span><span style="color:#50fa7b;">lidt</span><span>(</span><span style="font-style:italic;color:#66d9ef;">uintptr_t </span><span style="color:#ff79c6;">*</span><span>desc)
+</span><span style="color:#ffffff;">{
+</span><span>    </span><span style="font-style:italic;color:#8be9fd;">__asm__ </span><span style="color:#ff79c6;">volatile </span><span>(</span><span style="color:#f1fa8c;">&quot;lidt %0&quot; </span><span style="color:#ff79c6;">: : </span><span style="color:#f1fa8c;">&quot;m&quot; </span><span>(</span><span style="color:#ff79c6;">*</span><span>desc));
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p><code>vstart</code>が<code>cpu_desc_init</code>を呼び出して、<code>master_idt64</code>を<code>cdi-&gt;cdi_idtu</code>に入れます。その後、<code>cpu_desc_load</code>が<code>cdi-&gt;cdi_idtu</code>を引数に<code>lidt</code>を呼び出してIDTの初期化を行っています。</p>
+<p><code>master_idt64</code>の定義は以下です。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span style="font-style:italic;color:#8be9fd;">struct</span><span> fake_descriptor64 master_idt64[IDTSZ]
+</span><span style="color:#ff79c6;">__attribute__ </span><span>((section(</span><span style="color:#f1fa8c;">&quot;__HIB,__desc&quot;</span><span>)))
+</span><span style="color:#ff79c6;">__attribute__ </span><span>((aligned(PAGE_SIZE))) </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">{
+</span><span style="color:#ff79c6;">#include </span><span style="color:#f1fa8c;">&quot;../x86_64/idt_table.h&quot;
+</span><span style="color:#ffffff;">}</span><span>;
+</span></code></pre>
+<p><code>idt_table.h</code>の内容は以下です。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#50fa7b;">TRAP</span><span>(</span><span style="color:#bd93f9;">0x00</span><span>, idt64_zero_div)
+</span><span style="color:#50fa7b;">TRAP_IST1</span><span>(</span><span style="color:#bd93f9;">0x01</span><span>, idt64_debug)
+</span><span style="color:#50fa7b;">TRAP_IST2</span><span>(</span><span style="color:#bd93f9;">0x02</span><span>, idt64_nmi)
+</span><span style="color:#50fa7b;">USER_TRAP</span><span>(</span><span style="color:#bd93f9;">0x03</span><span>, idt64_int3)
+</span><span style="color:#50fa7b;">USER_TRAP</span><span>(</span><span style="color:#bd93f9;">0x04</span><span>, idt64_into)
+</span><span style="color:#50fa7b;">USER_TRAP</span><span>(</span><span style="color:#bd93f9;">0x05</span><span>, idt64_bounds)
+</span><span style="color:#50fa7b;">TRAP</span><span>(</span><span style="color:#bd93f9;">0x06</span><span>, idt64_invop)
+</span><span style="color:#50fa7b;">TRAP</span><span>(</span><span style="color:#bd93f9;">0x07</span><span>, idt64_nofpu)
+</span><span style="color:#50fa7b;">TRAP_IST1</span><span>(</span><span style="color:#bd93f9;">0x08</span><span>, idt64_double_fault)
+</span><span style="color:#50fa7b;">TRAP</span><span>(</span><span style="color:#bd93f9;">0x09</span><span>, idt64_fpu_over)
+</span><span style="color:#50fa7b;">TRAP_ERR</span><span>(</span><span style="color:#bd93f9;">0x0a</span><span>, idt64_inv_tss)
+</span><span style="color:#50fa7b;">TRAP_IST1</span><span>(</span><span style="color:#bd93f9;">0x0b</span><span>, idt64_segnp)
+</span><span style="color:#50fa7b;">TRAP_IST1</span><span>(</span><span style="color:#bd93f9;">0x0c</span><span>, idt64_stack_fault)
+</span><span style="color:#50fa7b;">TRAP_IST1</span><span>(</span><span style="color:#bd93f9;">0x0d</span><span>, idt64_gen_prot)
+</span><span style="color:#50fa7b;">TRAP_SPC</span><span>(</span><span style="color:#bd93f9;">0x0e</span><span>, idt64_page_fault)
+</span><span style="color:#6272a4;">// snip
+</span></code></pre>
+<p>実際に、IDT Registerの内容を読んでみると最初のentryに<code>idt64_zero_div</code>が入っていることがわかります。
+(IDTから参照されているアドレスが<code>idt64_zero_div</code>そのものでないのは、<code>double map</code>というセキュリティ機構によるもの)</p>
+<pre style="background-color:#282a36;color:#f8f8f2;"><code><span>IDT=     fffff69bc000c000
+</span><span>
+</span><span>(lldb) x/8hx fffff69bc000c000
+</span><span>0xfffff69bc000c000: 0x2560 0x0008 0x8e00 0xc000 0xf69b 0xffff 0x0000 0x0000
+</span><span>
+</span><span>(lldb) x/4i fffff69bc0002560
+</span><span>    0xfffff69bc0002560: push   0x0
+</span><span>    0xfffff69bc0002562: push   0x1
+</span><span>    0xfffff69bc0002564: push   0x0
+</span><span>    0xfffff69bc0002566: jmp    0xfffff69bc00037cf
+</span><span>
+</span><span>(lldb) disas -n idt64_zero_div
+</span><span>kernel`idt64_zero_div:
+</span><span>    0xffffff800dd02560 &lt;+0&gt;:  push   0x0
+</span><span>    0xffffff800dd02562 &lt;+2&gt;:  push   0x1
+</span><span>    0xffffff800dd02564 &lt;+4&gt;:  push   0x0
+</span><span>    0xffffff800dd02566 &lt;+6&gt;:  jmp    0xffffff800dd037cf ; hi64_sysenter + 31
+</span></code></pre>
+<h2 id="user-landkarakernel-landhe">user-landからkernel-landへ</h2>
+<p>ユーザーランドでpage fualtが発生するとIDT経由で<code>idt64_page_fault</code>が呼び出されます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(idt64_page_fault)
+</span><span style="color:#50fa7b;">	pushq	$(HNDL_ALLTRAPS)
+</span><span style="color:#50fa7b;">#if !(DEVELOPMENT || DEBUG)
+</span><span style="color:#50fa7b;">	pushq	$(T_PAGE_FAULT)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span style="color:#50fa7b;">L_dispatch
+</span></code></pre>
+<p><code>L_dispatch</code>はgsなどの設定をしたあとに、<code>ks_dispatch</code>を呼びます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(ks_dispatch)
+</span><span style="color:#50fa7b;">	popq	%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	cmpw	$(KERNEL64_CS)</span><span>, </span><span style="color:#50fa7b;">ISF64_CS(%</span><span style="font-style:italic;color:#ffb86c;">rsp</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">je	</span><span style="color:#50fa7b;">EXT(ks_dispatch_kernel)
+</span><span>
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov 	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_UBER_TMP
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov 	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_UBER_ISF</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">add 	</span><span style="color:#50fa7b;">$(ISF64_SIZE)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span>
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xchg	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsp</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">Memory to memory moves (aint x86 wonderful):
+</span><span style="color:#50fa7b;"> </span><span>* </span><span style="color:#50fa7b;">Transfer the exception frame from the per</span><span>-</span><span style="color:#8be9fd;">CPU </span><span style="color:#50fa7b;">exception stack to the
+</span><span style="color:#50fa7b;"> </span><span>* </span><span style="color:#f1fa8c;">&#39;PCB&#39; </span><span style="color:#50fa7b;">stack programmed </span><span style="color:#8be9fd;">at </span><span style="color:#50fa7b;">cswitch.
+</span><span style="color:#50fa7b;"> </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_SS(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_RSP(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_RFLAGS(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_CS(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_RIP(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_ERR(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">ISF64_TRAPFN(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push 	</span><span style="color:#50fa7b;">ISF64_TRAPNO(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_UBER_TMP</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span style="color:#50fa7b;">EXT(ks_dispatch_user)
+</span></code></pre>
+<p><code>ks_dispatch</code>はtrapnoなどをstackに積み、<code>ks_dispatch_user</code>を呼びます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(ks_dispatch_user)
+</span><span style="color:#50fa7b;">	cmpl	$(TASK_MAP_32BIT)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_TASK_MAP
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">je	</span><span style="color:#50fa7b;">L_dispatch_U32		/</span><span>* </span><span style="color:#bd93f9;">32</span><span>-</span><span style="color:#50fa7b;">bit user task </span><span>*</span><span style="color:#50fa7b;">/
+</span><span>
+</span><span style="color:#50fa7b;">L_dispatch_U64:
+</span><span style="color:#50fa7b;">	subq	$(ISS64_OFFSET)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsp
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span>, </span><span style="color:#50fa7b;">R64_R15(%</span><span style="font-style:italic;color:#ffb86c;">rsp</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsp</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r15
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_KERNEL_STACK</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsp
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span style="color:#50fa7b;">L_dispatch_64bit
+</span></code></pre>
+<p><code>L_dispatch_64bit</code>が呼ばれます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">/</span><span>*
+</span><span style="color:#50fa7b;"> </span><span>* </span><span style="color:#50fa7b;">Here for </span><span style="color:#bd93f9;">64</span><span>-</span><span style="color:#50fa7b;">bit user task </span><span style="color:#ff79c6;">or </span><span style="color:#50fa7b;">kernel
+</span><span style="color:#50fa7b;"> </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">L_dispatch_64bit:
+</span><span style="color:#50fa7b;">	movl	$(SS_64)</span><span>, </span><span style="color:#50fa7b;">SS_FLAVOR(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>*
+</span><span style="color:#50fa7b;">	 </span><span>* </span><span style="color:#50fa7b;">Save segment regs if a </span><span style="color:#bd93f9;">64</span><span>-</span><span style="color:#50fa7b;">bit task has
+</span><span style="color:#50fa7b;">	 </span><span>* </span><span style="color:#50fa7b;">installed customized segments </span><span style="color:#ff79c6;">in </span><span style="color:#50fa7b;">the LDT
+</span><span style="color:#50fa7b;">	 </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	cmpl	</span><span style="color:#8be9fd;">$</span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_CURTASK_HAS_LDT
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">je	</span><span style="color:#50fa7b;">L_skip_save_extra_segregs
+</span><span>
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">ds</span><span>, </span><span style="color:#50fa7b;">R64_DS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">es</span><span>, </span><span style="color:#50fa7b;">R64_ES(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span style="color:#50fa7b;">L_skip_save_extra_segregs:
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">fs</span><span>, </span><span style="color:#50fa7b;">R64_FS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span>, </span><span style="color:#50fa7b;">R64_GS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="color:#50fa7b;">Save general</span><span>-</span><span style="color:#50fa7b;">purpose registers </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span>, </span><span style="color:#50fa7b;">R64_RAX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rbx</span><span>, </span><span style="color:#50fa7b;">R64_RBX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rcx</span><span>, </span><span style="color:#50fa7b;">R64_RCX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdx</span><span>, </span><span style="color:#50fa7b;">R64_RDX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rbp</span><span>, </span><span style="color:#50fa7b;">R64_RBP(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdi</span><span>, </span><span style="color:#50fa7b;">R64_RDI(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsi</span><span>, </span><span style="color:#50fa7b;">R64_RSI(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r8</span><span>,  </span><span style="color:#50fa7b;">R64_R8(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r9</span><span>,  </span><span style="color:#50fa7b;">R64_R9(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r10</span><span>, </span><span style="color:#50fa7b;">R64_R10(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r11</span><span>, </span><span style="color:#50fa7b;">R64_R11(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r12</span><span>, </span><span style="color:#50fa7b;">R64_R12(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r13</span><span>, </span><span style="color:#50fa7b;">R64_R13(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r14</span><span>, </span><span style="color:#50fa7b;">R64_R14(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="color:#50fa7b;">Zero unused GPRs. </span><span style="font-style:italic;color:#ffb86c;">BX</span><span style="color:#50fa7b;">/</span><span style="font-style:italic;color:#ffb86c;">DX</span><span style="color:#50fa7b;">/</span><span style="font-style:italic;color:#ffb86c;">SI </span><span style="color:#50fa7b;">are clobbered elsewhere across the exception handler</span><span>, </span><span style="color:#ff79c6;">and </span><span style="color:#50fa7b;">are skipped. </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">ecx</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">ecx
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">edi</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">edi
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r8</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r8
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r9</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r9
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r10</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r10
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r11</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r11
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r12</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r12
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r13</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r13
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r14</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r14
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="font-style:italic;color:#ffb86c;">cr2 </span><span style="color:#50fa7b;">is significant only for page</span><span>-</span><span style="color:#50fa7b;">faults </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">xor	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	cmpl	</span><span style="color:#8be9fd;">$</span><span style="color:#50fa7b;">T_PAGE_FAULT</span><span>, </span><span style="color:#50fa7b;">R64_TRAPNO(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jne	</span><span style="color:#50fa7b;">1f
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">cr2</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#bd93f9;">1</span><span style="color:#50fa7b;">:
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span>, </span><span style="color:#50fa7b;">R64_CR2(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span style="color:#50fa7b;">L_dispatch_U64_after_fault:
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_TRAPNO(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">ebx	</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">ebx </span><span style="color:#50fa7b;">:= trapno for later </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_TRAPFN(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdx	</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdx </span><span style="color:#50fa7b;">:= trapfn for later </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_CS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">esi	</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">esi </span><span style="color:#50fa7b;">:= </span><span style="font-style:italic;color:#ffb86c;">cs </span><span style="color:#50fa7b;">for later </span><span>*</span><span style="color:#50fa7b;">/
+</span><span>
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span style="color:#50fa7b;">L_common_dispatch
+</span></code></pre>
+<p>ここで、user-landのレジスタを退避します。その後<code>rdx</code>にtrapnoを入れて<code>L_common_dispatch</code>を呼びます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">L_common_dispatch:
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="color:#50fa7b;">snip </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#bd93f9;">66</span><span style="color:#50fa7b;">:
+</span><span style="color:#50fa7b;">	leaq	EXT(idt64_hndl_table1)(%</span><span style="font-style:italic;color:#ffb86c;">rip</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span>*</span><span style="color:#50fa7b;">(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdx</span><span>, </span><span style="color:#bd93f9;">8</span><span style="color:#50fa7b;">)
+</span></code></pre>
+<p>TLB周りの処理をしたあと、<code>idt64_hndl_table1[trapno]</code>を呼び出します。なお、<code>idt64_hndl_table1</code>の定義は以下です。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">EXT(idt64_hndl_table1):
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_allintrs)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_alltraps)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_sysenter)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_syscall)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_unix_scall)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_mach_scall)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_mdep_scall)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_double_fault)
+</span><span style="color:#50fa7b;">	.quad	EXT(hndl_machine_check)
+</span><span style="color:#50fa7b;">.text
+</span></code></pre>
+<p><code>idt64_page_fault</code>で<code>$(HNDL_ALLTRAPS)</code>をpushしていることからもわかる通り、page
+faultの時は<code>hndl_all_traps</code>が呼ばれます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(hndl_alltraps)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">esi</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">eax
+</span><span style="color:#50fa7b;">	testb	</span><span style="color:#8be9fd;">$</span><span style="color:#bd93f9;">3</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">al
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jz	</span><span style="color:#50fa7b;">trap_from_kernel
+</span><span>
+</span><span style="color:#50fa7b;">	TIME_TRAP_UENTRY
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="color:#50fa7b;">Check for active vtimers </span><span style="color:#ff79c6;">in </span><span style="color:#50fa7b;">the current task </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_ACTIVE_THREAD</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rcx
+</span><span style="color:#50fa7b;">	movl	$</span><span>-</span><span style="color:#bd93f9;">1</span><span>, </span><span style="color:#50fa7b;">TH_IOTIER_OVERRIDE(%</span><span style="font-style:italic;color:#ffb86c;">rcx</span><span style="color:#50fa7b;">)	/</span><span>* </span><span style="color:#50fa7b;">Reset IO tier override to </span><span>-</span><span style="color:#bd93f9;">1 </span><span style="color:#50fa7b;">before handling trap/exception </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">TH_TASK(%</span><span style="font-style:italic;color:#ffb86c;">rcx</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rbx
+</span><span style="color:#50fa7b;">	TASK_VTIMER_CHECK(%</span><span style="font-style:italic;color:#ffb86c;">rbx</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rcx</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span style="color:#50fa7b;">	CCALL1(user_trap</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)			/</span><span>* </span><span style="color:#ff79c6;">call </span><span style="color:#50fa7b;">user trap routine </span><span>*</span><span style="color:#50fa7b;">/
+</span></code></pre>
+<p><code>hndl_alltraps</code>は<code>user_trap</code>を呼び出します。</p>
+<h2 id="user-trap">user_trap</h2>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span style="font-style:italic;color:#8be9fd;">void
+</span><span style="color:#50fa7b;">user_trap</span><span>(
+</span><span>	x86_saved_state_t </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">saved_state</span><span>)
+</span><span style="color:#ffffff;">{
+</span><span>	</span><span style="color:#6272a4;">// snip
+</span><span>	</span><span style="color:#ff79c6;">if </span><span>(</span><span style="color:#50fa7b;">is_saved_state64</span><span>(saved_state)) </span><span style="color:#ffffff;">{
+</span><span>		x86_saved_state64_t     </span><span style="color:#ff79c6;">*</span><span>regs;
+</span><span>
+</span><span>		regs </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">saved_state64</span><span>(saved_state);
+</span><span>
+</span><span>		</span><span style="color:#6272a4;">/* Record cpu where state was captured */
+</span><span>		regs</span><span style="color:#ff79c6;">-&gt;</span><span>isf</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">cpu </span><span style="color:#ff79c6;">=</span><span> current_cpu;
+</span><span>
+</span><span>		type </span><span style="color:#ff79c6;">=</span><span> regs</span><span style="color:#ff79c6;">-&gt;</span><span>isf</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">trapno</span><span>;
+</span><span>		err  </span><span style="color:#ff79c6;">= </span><span>(</span><span style="font-style:italic;color:#8be9fd;">int</span><span>)regs</span><span style="color:#ff79c6;">-&gt;</span><span>isf</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">err </span><span style="color:#ff79c6;">&amp; </span><span style="color:#bd93f9;">0xffff</span><span>;
+</span><span>		vaddr </span><span style="color:#ff79c6;">= </span><span>(user_addr_t)regs</span><span style="color:#ff79c6;">-&gt;</span><span>cr2;
+</span><span>		rip   </span><span style="color:#ff79c6;">= </span><span>(user_addr_t)regs</span><span style="color:#ff79c6;">-&gt;</span><span>isf</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">rip</span><span>;
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span>    </span><span style="color:#ffffff;">}
+</span><span>    </span><span style="color:#6272a4;">// snip
+</span><span>	</span><span style="color:#ff79c6;">switch </span><span>(type) </span><span style="color:#ffffff;">{
+</span><span>    	</span><span style="color:#ff79c6;">case</span><span> T_PAGE_FAULT:
+</span><span>	</span><span style="color:#ffffff;">{
+</span><span>		prot </span><span style="color:#ff79c6;">=</span><span> VM_PROT_READ;
+</span><span>
+</span><span>		</span><span style="color:#ff79c6;">if </span><span>(err </span><span style="color:#ff79c6;">&amp;</span><span> T_PF_WRITE) </span><span style="color:#ffffff;">{
+</span><span>			prot </span><span style="color:#ff79c6;">|=</span><span> VM_PROT_WRITE;
+</span><span>		</span><span style="color:#ffffff;">}
+</span><span>		</span><span style="color:#ff79c6;">if </span><span>(</span><span style="color:#50fa7b;">__improbable</span><span>(err </span><span style="color:#ff79c6;">&amp;</span><span> T_PF_EXECUTE)) </span><span style="color:#ffffff;">{
+</span><span>			prot </span><span style="color:#ff79c6;">|=</span><span> VM_PROT_EXECUTE;
+</span><span>		</span><span style="color:#ffffff;">}
+</span><span>		kret </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">vm_fault</span><span>(thread</span><span style="color:#ff79c6;">-&gt;</span><span>map,
+</span><span>		    vaddr,
+</span><span>		    prot, </span><span style="color:#bd93f9;">FALSE</span><span>, VM_KERN_MEMORY_NONE,
+</span><span>		    THREAD_ABORTSAFE, </span><span style="color:#bd93f9;">NULL</span><span>, </span><span style="color:#bd93f9;">0</span><span>);
+</span><span>		</span><span style="color:#ff79c6;">if </span><span>(</span><span style="color:#50fa7b;">__probable</span><span>((kret </span><span style="color:#ff79c6;">==</span><span> KERN_SUCCESS) </span><span style="color:#ff79c6;">|| </span><span>(kret </span><span style="color:#ff79c6;">==</span><span> KERN_ABORTED))) </span><span style="color:#ffffff;">{
+</span><span>			</span><span style="color:#ff79c6;">break</span><span>;
+</span><span>		</span><span style="color:#ffffff;">} </span><span style="color:#ff79c6;">else if </span><span>(</span><span style="color:#50fa7b;">__improbable</span><span>(kret </span><span style="color:#ff79c6;">==</span><span> KERN_FAILURE)) </span><span style="color:#ffffff;">{
+</span><span>			</span><span style="color:#6272a4;">/*
+</span><span style="color:#6272a4;">			 * For a user trap, vm_fault() should never return KERN_FAILURE.
+</span><span style="color:#6272a4;">			 * If it does, we&#39;re leaking preemption disables somewhere in the kernel.
+</span><span style="color:#6272a4;">			 */
+</span><span>			</span><span style="color:#50fa7b;">panic</span><span>(</span><span style="color:#f1fa8c;">&quot;vm_fault() KERN_FAILURE from user fault on thread </span><span style="color:#bd93f9;">%p</span><span style="color:#f1fa8c;">&quot;</span><span>, thread);
+</span><span>		</span><span style="color:#ffffff;">}
+</span><span>
+</span><span>		</span><span style="color:#6272a4;">/* PAL debug hook (empty on x86) */
+</span><span>		</span><span style="color:#50fa7b;">pal_dbg_page_fault</span><span>(thread, vaddr, kret);
+</span><span>		exc </span><span style="color:#ff79c6;">=</span><span> EXC_BAD_ACCESS;
+</span><span>		code </span><span style="color:#ff79c6;">=</span><span> kret;
+</span><span>		subcode </span><span style="color:#ff79c6;">=</span><span> vaddr;
+</span><span>	</span><span style="color:#ffffff;">}
+</span><span>	</span><span style="color:#ff79c6;">break</span><span>;
+</span></code></pre>
+<p><code>user_trap</code>はstackに積まれた<code>saved_state</code>をみて、例外の種類でswitchを行います。</p>
+<p>page faultの場合は、<code>T_PAGE_FAULT</code>です。その後、引数の設定を行って<code>vm_fault</code>を呼びます。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span>kern_return_t
+</span><span style="color:#50fa7b;">vm_fault</span><span>(
+</span><span>	vm_map_t        </span><span style="font-style:italic;color:#ffb86c;">map</span><span>,
+</span><span>	vm_map_offset_t </span><span style="font-style:italic;color:#ffb86c;">vaddr</span><span>,
+</span><span>	vm_prot_t       </span><span style="font-style:italic;color:#ffb86c;">fault_type</span><span>,
+</span><span>	boolean_t       </span><span style="font-style:italic;color:#ffb86c;">change_wiring</span><span>,
+</span><span>	vm_tag_t        </span><span style="font-style:italic;color:#ffb86c;">wire_tag</span><span>,               </span><span style="color:#6272a4;">/* if wiring must pass tag != VM_KERN_MEMORY_NONE */
+</span><span>	</span><span style="font-style:italic;color:#8be9fd;">int             </span><span style="font-style:italic;color:#ffb86c;">interruptible</span><span>,
+</span><span>	pmap_t          </span><span style="font-style:italic;color:#ffb86c;">caller_pmap</span><span>,
+</span><span>	vm_map_offset_t </span><span style="font-style:italic;color:#ffb86c;">caller_pmap_addr</span><span>)
+</span><span style="color:#ffffff;">{
+</span><span>	</span><span style="font-style:italic;color:#8be9fd;">struct</span><span> vm_object_fault_info fault_info </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">{
+</span><span>		</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">interruptible </span><span style="color:#ff79c6;">=</span><span> interruptible,
+</span><span>		</span><span style="color:#ff79c6;">.</span><span style="color:#ffffff;">fi_change_wiring </span><span style="color:#ff79c6;">=</span><span> change_wiring,
+</span><span>	</span><span style="color:#ffffff;">}</span><span>;
+</span><span>
+</span><span>	</span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">vm_fault_internal</span><span>(map, vaddr, fault_type, wire_tag,
+</span><span>	           caller_pmap, caller_pmap_addr,
+</span><span>	           </span><span style="color:#bd93f9;">NULL</span><span>, </span><span style="color:#ff79c6;">&amp;</span><span>fault_info);
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p><code>vm_fault_internal</code>が呼ばれます。ここでpage fault handlerのメインの処理が行われます(2400行あります)。</p>
+<h2 id="vm-fault-internal">vm_fault_internal</h2>
+<p>xnuのメモリ管理については、<a rel="noopener" target="_blank" href="https://papers.put.as/papers/macosx/2019/OBTS_v2_Beer.pdf">@i41nbeer氏のこのスライド</a>が詳しいです。</p>
+<p>正確性を犠牲にして雑にいうならば、<code>vm_map_t</code>が仮想アドレス空間全体、<code>vm_map_entry_t</code>が連続した仮想アドレス空間、<code>pmap_t</code>がページテーブルを表します。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span>kern_return_t
+</span><span style="color:#50fa7b;">vm_fault_internal</span><span>(
+</span><span>	vm_map_t           </span><span style="font-style:italic;color:#ffb86c;">map</span><span>,
+</span><span>	vm_map_offset_t    </span><span style="font-style:italic;color:#ffb86c;">vaddr</span><span>,
+</span><span>	vm_prot_t          </span><span style="font-style:italic;color:#ffb86c;">caller_prot</span><span>,
+</span><span>	vm_tag_t           </span><span style="font-style:italic;color:#ffb86c;">wire_tag</span><span>,               </span><span style="color:#6272a4;">/* if wiring must pass tag != VM_KERN_MEMORY_NONE */
+</span><span>	pmap_t             </span><span style="font-style:italic;color:#ffb86c;">caller_pmap</span><span>,
+</span><span>	vm_map_offset_t    </span><span style="font-style:italic;color:#ffb86c;">caller_pmap_addr</span><span>,
+</span><span>	ppnum_t            </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">physpage_p</span><span>,
+</span><span>	vm_object_fault_info_t </span><span style="font-style:italic;color:#ffb86c;">fault_info</span><span>)
+</span><span style="color:#ffffff;">{
+</span></code></pre>
+<p>関数定義はこのようになっています。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span>	kr </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">vm_map_lookup_and_lock_object</span><span>(</span><span style="color:#ff79c6;">&amp;</span><span>map, vaddr,
+</span><span>	    (fault_type </span><span style="color:#ff79c6;">| </span><span>(need_copy </span><span style="color:#ff79c6;">?</span><span> VM_PROT_COPY </span><span style="color:#ff79c6;">: </span><span style="color:#bd93f9;">0</span><span>)),
+</span><span>	    object_lock_type, </span><span style="color:#ff79c6;">&amp;</span><span>version,
+</span><span>	    </span><span style="color:#ff79c6;">&amp;</span><span>object, </span><span style="color:#ff79c6;">&amp;</span><span>offset, </span><span style="color:#ff79c6;">&amp;</span><span>prot, </span><span style="color:#ff79c6;">&amp;</span><span>wired,
+</span><span>	    fault_info,
+</span><span>	    </span><span style="color:#ff79c6;">&amp;</span><span>real_map,
+</span><span>	    </span><span style="color:#ff79c6;">&amp;</span><span>object_is_contended);
+</span></code></pre>
+<p>様々なassertをしたあと、<code>vm_map_lookup_and_lock_object</code>が呼ばれます。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span>kern_return_t
+</span><span style="color:#50fa7b;">vm_map_lookup_and_lock_object</span><span>(
+</span><span>	vm_map_t                </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">var_map</span><span>,       </span><span style="color:#6272a4;">/* IN/OUT */
+</span><span>	vm_map_offset_t         </span><span style="font-style:italic;color:#ffb86c;">vaddr</span><span>,
+</span><span>	vm_prot_t               </span><span style="font-style:italic;color:#ffb86c;">fault_type</span><span>,
+</span><span>	</span><span style="font-style:italic;color:#8be9fd;">int                     </span><span style="font-style:italic;color:#ffb86c;">object_lock_type</span><span>,
+</span><span>	vm_map_version_t        </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">out_version</span><span>,   </span><span style="color:#6272a4;">/* OUT */
+</span><span>	vm_object_t             </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">object</span><span>,        </span><span style="color:#6272a4;">/* OUT */
+</span><span>	vm_object_offset_t      </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">offset</span><span>,        </span><span style="color:#6272a4;">/* OUT */
+</span><span>	vm_prot_t               </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">out_prot</span><span>,      </span><span style="color:#6272a4;">/* OUT */
+</span><span>	boolean_t               </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">wired</span><span>,         </span><span style="color:#6272a4;">/* OUT */
+</span><span>	vm_object_fault_info_t  </span><span style="font-style:italic;color:#ffb86c;">fault_info</span><span>,     </span><span style="color:#6272a4;">/* OUT */
+</span><span>	vm_map_t                </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">real_map</span><span>,      </span><span style="color:#6272a4;">/* OUT */
+</span><span>	</span><span style="font-style:italic;color:#8be9fd;">bool                    </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">contended</span><span>)     </span><span style="color:#6272a4;">/* OUT */
+</span></code></pre>
+<p>この関数は<code>var_map</code>の<code>vaddr</code>に一致するアドレス空間の様々なデータを返します。</p>
+<p>長くなるので省略しますが、最終的にこの関数は<code>vm_map_store_lookup_entry_rb</code>を呼び出して、<code>var_map</code>が管理するRB
+treeから<code>vm_map_entry_t</code>を取得してきて、そこから種々の情報を取得します。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span style="font-style:italic;color:#8be9fd;">bool
+</span><span style="color:#50fa7b;">vm_map_store_lookup_entry_rb</span><span>(vm_map_t </span><span style="font-style:italic;color:#ffb86c;">map</span><span>, vm_map_offset_t </span><span style="font-style:italic;color:#ffb86c;">address</span><span>, vm_map_entry_t </span><span style="color:#ff79c6;">*</span><span style="font-style:italic;color:#ffb86c;">vm_entry</span><span>)
+</span><span style="color:#ffffff;">{
+</span><span>	</span><span style="font-style:italic;color:#8be9fd;">struct</span><span> vm_map_header </span><span style="color:#ff79c6;">*</span><span>hdr </span><span style="color:#ff79c6;">= &amp;</span><span>map</span><span style="color:#ff79c6;">-&gt;</span><span>hdr;
+</span><span>	</span><span style="font-style:italic;color:#8be9fd;">struct</span><span> vm_map_store  </span><span style="color:#ff79c6;">*</span><span>rb_entry </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">RB_ROOT</span><span>(</span><span style="color:#ff79c6;">&amp;</span><span>hdr</span><span style="color:#ff79c6;">-&gt;</span><span>rb_head_store);
+</span><span>	vm_map_entry_t       cur </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">vm_map_to_entry</span><span>(map);
+</span><span>	vm_map_entry_t       prev </span><span style="color:#ff79c6;">=</span><span> VM_MAP_ENTRY_NULL;
+</span><span>
+</span><span>	</span><span style="color:#ff79c6;">while </span><span>(rb_entry </span><span style="color:#ff79c6;">!= </span><span>(</span><span style="font-style:italic;color:#8be9fd;">struct</span><span> vm_map_store</span><span style="color:#ff79c6;">*</span><span>)</span><span style="color:#bd93f9;">NULL</span><span>) </span><span style="color:#ffffff;">{
+</span><span>		cur </span><span style="color:#ff79c6;">=  </span><span style="color:#50fa7b;">VME_FOR_STORE</span><span>(rb_entry);
+</span><span>		</span><span style="color:#ff79c6;">if </span><span>(address </span><span style="color:#ff79c6;">&gt;=</span><span> cur</span><span style="color:#ff79c6;">-&gt;</span><span>vme_start) </span><span style="color:#ffffff;">{
+</span><span>			</span><span style="color:#ff79c6;">if </span><span>(address </span><span style="color:#ff79c6;">&lt;</span><span> cur</span><span style="color:#ff79c6;">-&gt;</span><span>vme_end) </span><span style="color:#ffffff;">{
+</span><span>				</span><span style="color:#ff79c6;">*</span><span>vm_entry </span><span style="color:#ff79c6;">=</span><span> cur;
+</span><span>				</span><span style="color:#ff79c6;">return </span><span style="color:#bd93f9;">TRUE</span><span>;
+</span><span>			</span><span style="color:#ffffff;">}
+</span><span>			rb_entry </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">RB_RIGHT</span><span>(rb_entry, entry);
+</span><span>			prev </span><span style="color:#ff79c6;">=</span><span> cur;
+</span><span>		</span><span style="color:#ffffff;">} </span><span style="color:#ff79c6;">else </span><span style="color:#ffffff;">{
+</span><span>			rb_entry </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">RB_LEFT</span><span>(rb_entry, entry);
+</span><span>		</span><span style="color:#ffffff;">}
+</span><span>	</span><span style="color:#ffffff;">}
+</span><span>	</span><span style="color:#ff79c6;">if </span><span>(prev </span><span style="color:#ff79c6;">==</span><span> VM_MAP_ENTRY_NULL) </span><span style="color:#ffffff;">{
+</span><span>		prev </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">vm_map_to_entry</span><span>(map);
+</span><span>	</span><span style="color:#ffffff;">}
+</span><span>	</span><span style="color:#ff79c6;">*</span><span>vm_entry </span><span style="color:#ff79c6;">=</span><span> prev;
+</span><span>	</span><span style="color:#ff79c6;">return </span><span style="color:#bd93f9;">FALSE</span><span>;
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p>その後、<code>vm_fault_page</code>を呼び出して、pageをinsertします。</p>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span>	vm_fault_return_t err </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">vm_fault_page</span><span>(object, offset, fault_type,
+</span><span>	    (fault_info</span><span style="color:#ff79c6;">-&gt;</span><span>fi_change_wiring </span><span style="color:#ff79c6;">&amp;&amp; !</span><span>wired),
+</span><span>	    </span><span style="color:#bd93f9;">FALSE</span><span>,                </span><span style="color:#6272a4;">/* page not looked up */
+</span><span>	    </span><span style="color:#ff79c6;">&amp;</span><span>prot, </span><span style="color:#ff79c6;">&amp;</span><span>result_page, </span><span style="color:#ff79c6;">&amp;</span><span>top_page,
+</span><span>	    </span><span style="color:#ff79c6;">&amp;</span><span>type_of_fault,
+</span><span>	    </span><span style="color:#ff79c6;">&amp;</span><span>error_code, map</span><span style="color:#ff79c6;">-&gt;</span><span>no_zero_fill,
+</span><span>	    fault_info);
+</span></code></pre>
+<pre data-lang="c" style="background-color:#282a36;color:#f8f8f2;" class="language-c "><code class="language-c" data-lang="c"><span>			m </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">vm_page_grab_options</span><span>(grab_options);
+</span><span>			</span><span style="color:#ff79c6;">if </span><span>(m </span><span style="color:#ff79c6;">==</span><span> VM_PAGE_NULL) </span><span style="color:#ffffff;">{
+</span><span>				</span><span style="color:#50fa7b;">vm_fault_cleanup</span><span>(object, first_m);
+</span><span>				</span><span style="color:#50fa7b;">thread_interrupt_level</span><span>(interruptible_state);
+</span><span>
+</span><span>				</span><span style="color:#ff79c6;">return</span><span> VM_FAULT_MEMORY_SHORTAGE;
+</span><span>			</span><span style="color:#ffffff;">}
+</span><span>
+</span><span>			</span><span style="color:#ff79c6;">if </span><span>(fault_info </span><span style="color:#ff79c6;">&amp;&amp;</span><span> fault_info</span><span style="color:#ff79c6;">-&gt;</span><span>batch_pmap_op </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">TRUE</span><span>) </span><span style="color:#ffffff;">{
+</span><span>				</span><span style="color:#50fa7b;">vm_page_insert_internal</span><span>(m, object,
+</span><span>				    </span><span style="color:#50fa7b;">vm_object_trunc_page</span><span>(offset),
+</span><span>				    VM_KERN_MEMORY_NONE, </span><span style="color:#bd93f9;">FALSE</span><span>, </span><span style="color:#bd93f9;">TRUE</span><span>, </span><span style="color:#bd93f9;">TRUE</span><span>, </span><span style="color:#bd93f9;">FALSE</span><span>, </span><span style="color:#bd93f9;">NULL</span><span>);
+</span><span>			</span><span style="color:#ffffff;">} </span><span style="color:#ff79c6;">else </span><span style="color:#ffffff;">{
+</span><span>				</span><span style="color:#50fa7b;">vm_page_insert</span><span>(m, object, </span><span style="color:#50fa7b;">vm_object_trunc_page</span><span>(offset));
+</span><span>			</span><span style="color:#ffffff;">}
+</span><span>
+</span></code></pre>
+<p>この後、様々な後処理をして<code>hndl_alltraps</code>に戻ります(長いので割愛)。</p>
+<h2 id="kernel-landkarauser-landhe">kernel-landからuser-landへ</h2>
+<p><code>hndl_alltraps</code>に戻ってきたあと、<code>return_from_traps</code>へ進みます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(return_from_trap)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">movq	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_ACTIVE_THREAD</span><span>,</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r15	</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">Get current thread </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	movl	$</span><span>-</span><span style="color:#bd93f9;">1</span><span>, </span><span style="color:#50fa7b;">TH_IOTIER_OVERRIDE(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)	/</span><span>* </span><span style="color:#50fa7b;">Reset IO tier override to </span><span>-</span><span style="color:#bd93f9;">1 </span><span style="color:#50fa7b;">before returning to userspace </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">movq	</span><span style="color:#50fa7b;">TH_PCB_ISS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r15		</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">PCB stack </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	movl	%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_PENDING_AST</span><span>,</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">eax
+</span><span style="color:#50fa7b;">	testl	%</span><span style="font-style:italic;color:#ffb86c;">eax</span><span>,</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">eax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">je	</span><span style="color:#50fa7b;">EXT(return_to_user)		/</span><span>* </span><span style="color:#50fa7b;">branch if no AST </span><span>*</span><span style="color:#50fa7b;">/
+</span></code></pre>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(ret_to_user)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_ACTIVE_THREAD</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdx
+</span><span style="color:#50fa7b;">	cmpq	</span><span style="color:#8be9fd;">$</span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#50fa7b;">TH_PCB_IDS(%</span><span style="font-style:italic;color:#ffb86c;">rdx</span><span style="color:#50fa7b;">)	/</span><span>* </span><span style="color:#50fa7b;">Is there a debug register context? </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jnz	</span><span style="color:#50fa7b;">L_dr_restore_island
+</span><span style="color:#50fa7b;">L_post_dr_restore:
+</span><span style="color:#50fa7b;">	/</span><span>*
+</span><span style="color:#50fa7b;">	 </span><span>* </span><span style="color:#50fa7b;">We now mark the task&#39;s address space as active for TLB coherency.
+</span><span style="color:#50fa7b;">	 </span><span>* </span><span style="color:#50fa7b;">Handle special cases such as pagezero</span><span>-</span><span style="color:#50fa7b;">less tasks here.
+</span><span style="color:#50fa7b;">	 </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_TASK_CR3</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rcx
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rcx</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_ACTIVE_CR3
+</span><span style="color:#50fa7b;">	cmpl	</span><span style="color:#8be9fd;">$</span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_PAGEZERO_MAPPED
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jnz	</span><span style="color:#50fa7b;">L_cr3_switch_island
+</span><span style="color:#50fa7b;">	movl	EXT(no_shared_cr3)(%</span><span style="font-style:italic;color:#ffb86c;">rip</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">eax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">test	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">eax</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">eax		</span><span style="color:#50fa7b;">/</span><span>* -</span><span style="color:#50fa7b;">no_shared_cr3 </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#ff79c6;">jnz	</span><span style="color:#50fa7b;">L_cr3_switch_island
+</span><span style="color:#50fa7b;">    L_cr3_switch_return:
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_DR7</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax	</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">Is there a debug control register?</span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">cmp	</span><span style="color:#8be9fd;">$</span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">je	</span><span style="color:#50fa7b;">4f
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">dr7		</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">Set </span><span style="font-style:italic;color:#ffb86c;">DR7 </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">movq	</span><span style="color:#8be9fd;">$</span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_DR7
+</span><span style="color:#bd93f9;">4</span><span style="color:#50fa7b;">:
+</span><span style="color:#50fa7b;">	cmpl	$(SS_64)</span><span>, </span><span style="color:#50fa7b;">SS_FLAVOR(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)	/</span><span>* </span><span style="color:#bd93f9;">64</span><span>-</span><span style="color:#50fa7b;">bit state? </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jne	</span><span style="color:#50fa7b;">L_32bit_return
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>*
+</span><span style="color:#50fa7b;">	 </span><span>* </span><span style="color:#50fa7b;">Restore general </span><span style="color:#bd93f9;">64</span><span>-</span><span style="color:#50fa7b;">bit registers.
+</span><span style="color:#50fa7b;">	 </span><span>* </span><span style="color:#50fa7b;">Here on fault stack </span><span style="color:#ff79c6;">and </span><span style="color:#50fa7b;">PCB address </span><span style="color:#ff79c6;">in </span><span style="font-style:italic;color:#ffb86c;">R15</span><span style="color:#50fa7b;">.
+</span><span style="color:#50fa7b;">	 </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	leaq	EXT(idt64_hndl_table0)(%</span><span style="font-style:italic;color:#ffb86c;">rip</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span>*</span><span style="color:#bd93f9;">8</span><span style="color:#50fa7b;">(%</span><span style="font-style:italic;color:#ffb86c;">rax</span><span style="color:#50fa7b;">)
+</span><span>
+</span></code></pre>
+<p><code>ks_64bit_return</code>が呼ばれます。</p>
+<pre data-lang="asm" style="background-color:#282a36;color:#f8f8f2;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#50fa7b;">Entry(ks_64bit_return)
+</span><span>
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R14(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r14
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R13(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r13
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R12(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r12
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R11(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r11
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R10(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r10
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R9(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>,  </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r9
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R8(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>,  </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r8
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RSI(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsi
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RDI(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdi
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RBP(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rbp
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RDX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rdx
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RCX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rcx
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RBX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rbx
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_RAX(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rax
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="color:#50fa7b;">Switch to per</span><span>-</span><span style="color:#8be9fd;">CPU </span><span style="color:#50fa7b;">exception stack </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">gs</span><span style="color:#50fa7b;">:CPU_ESTACK</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">rsp
+</span><span>
+</span><span style="color:#50fa7b;">	/</span><span>* </span><span style="color:#50fa7b;">Synthesize interrupt stack frame from PCB savearea to exception stack </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">R64_SS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">R64_RSP(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">R64_RFLAGS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">R64_CS(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">push	</span><span style="color:#50fa7b;">R64_RIP(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)
+</span><span>
+</span><span style="color:#50fa7b;">	cmpw	$(KERNEL64_CS)</span><span>, </span><span style="color:#bd93f9;">8</span><span style="color:#50fa7b;">(%</span><span style="font-style:italic;color:#ffb86c;">rsp</span><span style="color:#50fa7b;">)
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jne	</span><span style="color:#50fa7b;">1f			/</span><span>* </span><span style="color:#50fa7b;">Returning to user (%</span><span style="font-style:italic;color:#ffb86c;">r15 </span><span style="color:#50fa7b;">will be restored after the segment checks) </span><span>*</span><span style="color:#50fa7b;">/
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">mov	</span><span style="color:#50fa7b;">R64_R15(%</span><span style="font-style:italic;color:#ffb86c;">r15</span><span style="color:#50fa7b;">)</span><span>, </span><span style="color:#50fa7b;">%</span><span style="font-style:italic;color:#ffb86c;">r15
+</span><span style="color:#50fa7b;">	</span><span style="color:#ff79c6;">jmp	</span><span style="color:#50fa7b;">L_64b_kernel_return	/</span><span>* </span><span style="color:#50fa7b;">Returning to kernel </span><span>*</span><span style="color:#50fa7b;">/
+</span><span>
+</span><span style="color:#50fa7b;">L_64b_kernel_return:
+</span><span style="color:#50fa7b;">.globl EXT(ret64_iret)
+</span><span style="color:#50fa7b;">EXT(ret64_iret):
+</span><span style="color:#50fa7b;">        </span><span style="color:#ff79c6;">iretq			</span><span style="color:#50fa7b;">/</span><span>* </span><span style="color:#50fa7b;">return from interrupt </span><span>*</span><span style="color:#50fa7b;">/
+</span></code></pre>
+<p><code>iret</code>が呼ばれて、無事user-landへ帰還できます。</p>
+<h1 id="owarini">おわりに</h1>
+<p>あまりメモリ管理の本質的なところに全然触れられなかった...。</p>
+
+      <nav>
+        <div>
+        </div>
+        <div>
+          <a href="https://l3tvia.rqda.wtf/build-aosp/"> How to Build Android 15 arm64 for QEMU &#8250;</a>
+        </div>
+      </nav>
+    </article>
+
+    <div class="sblock">
+      <div class="blockdiv sticky">
+        <a class="b s150" href="#">Index</a>
+        <div>
+          <a href="#zhui-ji">追記</a>
+        </div>
+        <div>
+          <a href="#fault-handler">Fault Handler</a>
+        </div>
+        <div class="hpad">
+          <a href="#idtnosetutoatupu"><small>- IDTのセットアップ</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#user-landkarakernel-landhe"><small>- user-landからkernel-landへ</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#user-trap"><small>- user_trap</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#vm-fault-internal"><small>- vm_fault_internal</small></a>
+        </div>
+        <div class="hpad">
+          <a href="#kernel-landkarauser-landhe"><small>- kernel-landからuser-landへ</small></a>
+        </div>
+        <div>
+          <a href="#owarini">おわりに</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="c">
+      <nav class="tpad"><div><a class="js m-protected" href="#bmFtZUBleGFtcGxlLmNvbQ==" target="_blank" title="Mail"><i type="Button" class="svg mail" title="Mail"></i></a><a href="https://mastodon.example.com/@username" target="_blank" title="Mastodon" rel="me"><i type="Button" class="svg mastodon" title="Mastodon"></i></a><a href="https://matrix.example.com/" target="_blank" title="Element"><i type="Button" class="svg element" title="Element"></i></a><a href="https://github.com/your-user-name/" target="_blank" title="Github"><i type="Button" class="svg github" title="Github"></i></a><a href="https://www.instagram.com/your-user-name/" target="_blank" title="Instagram"><i type="Button" class="svg instagram" title="Instagram"></i></a><a href="https://www.youtube.com/channel&#x2F;your-channel-id" target="_blank" title="YouTube"><i type="Button" class="svg youtube" title="YouTube"></i></a><a href="https://www.twitch.tv/your-user-name/" target="_blank" title="Twitch"><i type="Button" class="svg twitch" title="Twitch"></i></a><a href="https://www.ko-fi.com/your-user-name/" target="_blank" title="Support me on Ko-fi"><i type="Button" class="svg kofi" title="Support me on Ko-fi"></i></a></div></nav>
+      <nav class="vpad">
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/about/"> About </a>
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/contact/"> Contact </a>
+        <a class="rpad s90" href="https://github.com/rqdaA/l3tvia"> Repository </a>
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/atom.xml" target="_blank"> RSS </a>
+      </nav>
+      <p class="s80"> &copy; <span id="year">2025</span> L3tvia</p>
+      <p class="s80">Powered by <a href="https://www.getzola.org/" target="_blank">Zola</a> and <a href="https://github.com/jieiku/abridge/" target="_blank">Abridge</a></p>
+    </div>
+  </footer><span class="topout">
+<span class="topleft"> </span><a href="#" class="top" title="Back to Top"><i class="svgs svgh angu"></i></a>
+</span>
+</body>
+</html>

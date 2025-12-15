@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://l3tvia.rqda.wtf/js/theme.min.js" integrity="sha384-pb++s6uBRKaQv+iAXpgA/H3IlpLZdO14tTwuCI7uXmz4aaZdByoCcM+6BhynMq/1"></script>
+  <link rel="stylesheet" href="https://l3tvia.rqda.wtf/abridge.css?h=2dcd8720d5405384ca5d" />
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="base" content="https://l3tvia.rqda.wtf" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#333333" />
+  <meta name="msapplication-TileColor" content="#333333" />
+  <link rel="manifest" href="https://l3tvia.rqda.wtf/manifest.min.json" />
+  <link rel="icon" type="image/svg+xml" href="https://l3tvia.rqda.wtf/favicon.svg" />
+  <link rel="preload" as="font" href="https://l3tvia.rqda.wtf/fonts/HackGen35-Regular.ttf" type="font/woff2" />
+  <link rel="preload" as="style" class="preStyle" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="alternate" type="application/atom+xml" title="L3tvia Atom Feed" href="https://l3tvia.rqda.wtf/atom.xml" />
+  <meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <title>How to Build Android 15 arm64 for QEMU / L3tvia</title>
+  <meta name="author" content="Rona" />
+  <meta name="copyright" content="L3tvia" />
+  <meta name="description" content="Simple guide to building Android 15 (AOSP) for arm64 architecture on QEMU emulator" />
+  <link rel="canonical" href="https://l3tvia.rqda.wtf/build-aosp/" />
+  <meta name="keywords" content="Kernel exploit, exploit, pwn, ctf, ROP, Privilege escalation, rona, vulnerability, vulns" />
+  <meta property="og:url" content="https://l3tvia.rqda.wtf/build-aosp/" />
+  <meta name="twitter:url" content="https://l3tvia.rqda.wtf/build-aosp/" />
+  <meta property="og:description" content="Simple guide to building Android 15 (AOSP) for arm64 architecture on QEMU emulator" />
+  <meta name="twitter:description" content="Simple guide to building Android 15 (AOSP) for arm64 architecture on QEMU emulator" />
+  <meta property="og:title" content="How to Build Android 15 arm64 for QEMU | L3tvia" />
+  <meta name="twitter:title" content="How to Build Android 15 arm64 for QEMU | L3tvia" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="L3tvia" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2025-02-19" />
+  <script defer src="https://l3tvia.rqda.wtf/js/abridge.min.js?h=e0f9a881a665c86cce9c" integrity="sha384-QF67y7RnPkuDrJNQqn3/7nYxqxWkW/qHI7zN0WTES1aXbf+TotoByRBb835fUE6U"></script>
+  <noscript><link rel="stylesheet" href="https://l3tvia.rqda.wtf/nojs.css" /></noscript>
+</head>
+<body>
+  <header>
+    <nav>
+      <div><big><a href="https://l3tvia.rqda.wtf" title="L3tvia"><font color="#f90">L</font>3tvia</a></big></div>
+      <div>
+
+        <div>
+          <ul><li><a class="s110" href="https://l3tvia.rqda.wtf/archive/"> Posts </a></li><li><a class="s110" href="https://l3tvia.rqda.wtf/tags/"> Tags </a></li><li><i type="reset" id="mode" class="js svgs adjust"></i></ul>
+        </div>
+
+        <div>
+          <div>
+            <form autocomplete=off class="js" name="goSearch" id="searchbox">
+              <div class="searchd">
+                <input id="searchinput" type="text" placeholder="Search" title="Search" />
+                <button type="submit" title="Search" class="svgs svgm search"></button>
+              </div>
+              <div class="results"><div id="suggestions"></div></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+  <main>
+    <article>
+      <h1><a href="https://l3tvia.rqda.wtf/build-aosp/">How to Build Android 15 arm64 for QEMU</a></h1>
+
+      <span class="s95"><i class="svgs fa-solid fa-pen-fancy"></i>  Rona <span class="rpad"></span><i class="svgs fa-solid fa-calendar"></i>  February 19, 2025 <span class="rpad"></span> #<a href="https://l3tvia.rqda.wtf/tags/build/">Build</a>  #<a href="https://l3tvia.rqda.wtf/tags/setup/">Setup</a> </span>
+
+    
+        <div class="block">
+      <div class="blockdiv">
+        <a class="b s150" href="https://l3tvia.rqda.wtf/tags/setup/">Setup (Series)</a><br>
+            <a href="https://l3tvia.rqda.wtf/build/">Kernel Exploit環境構築</a><br>
+            <a class="scur" href="https://l3tvia.rqda.wtf/build-aosp/">How to Build Android 15 arm64 for QEMU</a><br> 
+          
+      </div>
+    </div>
+
+
+<h1 id="sosukodowoqu-de">ソースコードを取得</h1>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span> </span><span style="color:#50fa7b;">mkdir</span><span> android </span><span style="color:#ff79c6;">&amp;&amp; </span><span style="color:#8be9fd;">cd</span><span> android
+</span><span> </span><span style="color:#50fa7b;">repo</span><span> init</span><span style="font-style:italic;color:#ffb86c;"> -u</span><span> https://android.googlesource.com/kernel/manifest</span><span style="font-style:italic;color:#ffb86c;"> -b</span><span> common-android15-6.6-lts
+</span><span> </span><span style="color:#50fa7b;">repo</span><span> sync</span><span style="font-style:italic;color:#ffb86c;"> -c -d -j</span><span>`</span><span style="color:#50fa7b;">nproc</span><span>`
+</span></code></pre>
+<h1 id="sosukodogai-bian">ソースコード改変</h1>
+<p>必要なLKMをkernel本体にくっつける作業</p>
+<pre data-lang="diff" style="background-color:#282a36;color:#f8f8f2;" class="language-diff "><code class="language-diff" data-lang="diff"><span>diff --git a/arch/arm64/configs/gki_defconfig b/arch/arm64/configs/gki_defconfig
+</span><span>index e4a6cfe6fa5b..260082894c00 100644
+</span><span style="color:#6272a4;">--- a/arch/arm64/configs/gki_defconfig
+</span><span style="color:#6272a4;">+++ b/arch/arm64/configs/gki_defconfig
+</span><span style="color:#6272a4;">@@ -785,3 +785,19 @@ CONFIG_KUNIT_TEST=m
+</span><span> CONFIG_KUNIT_EXAMPLE_TEST=m
+</span><span> # CONFIG_KUNIT_DEFAULT_ENABLED is not set
+</span><span> # CONFIG_RUNTIME_TESTING_MENU is not set
+</span><span style="color:#50fa7b;">+
+</span><span style="color:#50fa7b;">+CONFIG_PTP_1588_CLOCK=y
+</span><span style="color:#50fa7b;">+CONFIG_E1000=y
+</span><span style="color:#50fa7b;">+CONFIG_E1000E=y
+</span><span style="color:#50fa7b;">+CONFIG_VIRTIO_PCI=y
+</span><span style="color:#50fa7b;">+CONFIG_VIRTIO_BALLOON=y
+</span><span style="color:#50fa7b;">+CONFIG_VIRTIO_BLK=y
+</span><span style="color:#50fa7b;">+CONFIG_VIRTIO_NET=y
+</span><span style="color:#50fa7b;">+CONFIG_9P_FS_SECURITY=y
+</span><span style="color:#50fa7b;">+CONFIG_NET_9P=y
+</span><span style="color:#50fa7b;">+CONFIG_NET_9P_VIRTIO=y
+</span><span style="color:#50fa7b;">+CONFIG_NET_9P_DEBUG=y
+</span><span style="color:#50fa7b;">+CONFIG_9P_FS=y
+</span><span style="color:#50fa7b;">+CONFIG_9P_FS_POSIX_ACL=y
+</span><span style="color:#50fa7b;">+CONFIG_DEVTMPFS=y
+</span><span style="color:#50fa7b;">+CONFIG_DEVTMPFS_MOUNT=y
+</span><span>
+</span><span>diff --git a/build.config.gki b/build.config.gki
+</span><span>index 4b931d9eb333..da87a30d24e8 100644
+</span><span style="color:#6272a4;">--- a/build.config.gki
+</span><span style="color:#6272a4;">+++ b/build.config.gki
+</span><span style="color:#6272a4;">@@ -1,2 +1,2 @@
+</span><span> DEFCONFIG=gki_defconfig
+</span><span style="color:#ff79c6;">-POST_DEFCONFIG_CMDS=&quot;check_defconfig&quot;
+</span><span style="color:#50fa7b;">+###POST_DEFCONFIG_CMDS=&quot;check_defconfig&quot;
+</span><span>
+</span><span>diff --git a/modules.bzl b/modules.bzl
+</span><span>index c93be156738d..9ad3e7624c74 100644
+</span><span style="color:#6272a4;">--- a/modules.bzl
+</span><span style="color:#6272a4;">+++ b/modules.bzl
+</span><span style="color:#6272a4;">@@ -8,7 +8,7 @@ This module contains a full list of kernel modules
+</span><span>
+</span><span> _COMMON_GKI_MODULES_LIST = [
+</span><span>     # keep sorted
+</span><span style="color:#ff79c6;">-    &quot;drivers/block/virtio_blk.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/block/virtio_blk.ko&quot;,
+</span><span>     &quot;drivers/block/zram/zram.ko&quot;,
+</span><span>     &quot;drivers/bluetooth/btbcm.ko&quot;,
+</span><span>     &quot;drivers/bluetooth/btqca.ko&quot;,
+</span><span style="color:#6272a4;">@@ -39,16 +39,16 @@ _COMMON_GKI_MODULES_LIST = [
+</span><span>     &quot;drivers/net/usb/rtl8150.ko&quot;,
+</span><span>     &quot;drivers/net/usb/usbnet.ko&quot;,
+</span><span>     &quot;drivers/net/wwan/wwan.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/pps/pps_core.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/ptp/ptp.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/pps/pps_core.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/ptp/ptp.ko&quot;,
+</span><span>     &quot;drivers/usb/class/cdc-acm.ko&quot;,
+</span><span>     &quot;drivers/usb/mon/usbmon.ko&quot;,
+</span><span>     &quot;drivers/usb/serial/ftdi_sio.ko&quot;,
+</span><span>     &quot;drivers/usb/serial/usbserial.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/virtio/virtio_balloon.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/virtio/virtio_pci.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/virtio/virtio_pci_legacy_dev.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/virtio/virtio_pci_modern_dev.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/virtio/virtio_balloon.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/virtio/virtio_pci.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/virtio/virtio_pci_legacy_dev.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/virtio/virtio_pci_modern_dev.ko&quot;,
+</span><span>     &quot;kernel/kheaders.ko&quot;,
+</span><span>     &quot;lib/crypto/libarc4.ko&quot;,
+</span><span>     &quot;mm/zsmalloc.ko&quot;,
+</span><span style="color:#6272a4;">@@ -61,8 +61,8 @@ _COMMON_GKI_MODULES_LIST = [
+</span><span>     &quot;net/6lowpan/nhc_routing.ko&quot;,
+</span><span>     &quot;net/6lowpan/nhc_udp.ko&quot;,
+</span><span>     &quot;net/8021q/8021q.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;net/9p/9pnet.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;net/9p/9pnet_fd.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;net/9p/9pnet.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;net/9p/9pnet_fd.ko&quot;,
+</span><span>     &quot;net/bluetooth/bluetooth.ko&quot;,
+</span><span>     &quot;net/bluetooth/hidp/hidp.ko&quot;,
+</span><span>     &quot;net/bluetooth/rfcomm/rfcomm.ko&quot;,
+</span><span style="color:#6272a4;">@@ -97,7 +97,7 @@ _ARM64_GKI_MODULES_LIST = [
+</span><span>     &quot;arch/arm64/geniezone/gzvm.ko&quot;,
+</span><span>     &quot;drivers/char/hw_random/cctrng.ko&quot;,
+</span><span>     &quot;drivers/misc/open-dice.ko&quot;,
+</span><span style="color:#ff79c6;">-    &quot;drivers/ptp/ptp_kvm.ko&quot;,
+</span><span style="color:#50fa7b;">+    # &quot;drivers/ptp/ptp_kvm.ko&quot;,
+</span></code></pre>
+<h1 id="build">Build</h1>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">tools/bazel</span><span> run //common:kernel_aarch64_dist
+</span></code></pre>
+<h1 id="create-rootfs">Create rootfs</h1>
+<p><strong>WIP</strong></p>
+<h1 id="boot">Boot</h1>
+<pre data-lang="sh" style="background-color:#282a36;color:#f8f8f2;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#50fa7b;">qemu-system-aarch64 </span><span>\
+</span><span style="font-style:italic;color:#ffb86c;">        -m</span><span> 2048 \
+</span><span style="font-style:italic;color:#ffb86c;">        -smp</span><span> 2 \
+</span><span style="font-style:italic;color:#ffb86c;">        -machine</span><span> virt \
+</span><span style="font-style:italic;color:#ffb86c;">        -cpu</span><span> cortex-a57 \
+</span><span style="font-style:italic;color:#ffb86c;">        -display</span><span> none \
+</span><span style="font-style:italic;color:#ffb86c;">        -serial</span><span> stdio \
+</span><span style="font-style:italic;color:#ffb86c;">        -no-reboot </span><span>\
+</span><span style="font-style:italic;color:#ffb86c;">        -device</span><span> virtio-rng-pci \
+</span><span style="font-style:italic;color:#ffb86c;">        -cpu</span><span> coretex-a57 \
+</span><span style="font-style:italic;color:#ffb86c;">        -device</span><span> e1000,netdev=net0 \
+</span><span style="font-style:italic;color:#ffb86c;">        -netdev</span><span> user,id=net0,restrict=on,hostfwd=tcp::20022-:22 \
+</span><span style="font-style:italic;color:#ffb86c;">        -drive</span><span> file=./rootfs.ext2,if=virtio,format=raw,cache=none \
+</span><span style="font-style:italic;color:#ffb86c;">        -snapshot </span><span>\
+</span><span style="font-style:italic;color:#ffb86c;">        -kernel</span><span> ./Image \
+</span><span style="font-style:italic;color:#ffb86c;">        -append </span><span style="color:#f1fa8c;">&#39;rdinit=/linuxrc console=ttyAMA0 root=/dev/vda verbose&#39;
+</span></code></pre>
+
+      <nav>
+        <div>
+          <a href="https://l3tvia.rqda.wtf/coins-adc-2026/">&#8249; XNUのpage fault handlerを読む</a>
+        </div>
+        <div>
+          <a href="https://l3tvia.rqda.wtf/book56/"> WORD56号 &#8250;</a>
+        </div>
+      </nav>
+    </article>
+
+    <div class="sblock">
+      <div class="blockdiv">
+        <a class="b s150" href="https://l3tvia.rqda.wtf/tags/setup/">Series</a><br>
+            
+      <a href="https://l3tvia.rqda.wtf/build/">Kernel Exploit環境構築</a><br>
+            
+      <a class="scur" href="https://l3tvia.rqda.wtf/build-aosp/">How to Build Android 15 arm64 for QEMU</a><br>
+    
+      </div>
+      <div class="blockdiv sticky">
+        <a class="b s150" href="#">Index</a>
+        <div>
+          <a href="#sosukodowoqu-de">ソースコードを取得</a>
+        </div>
+        <div>
+          <a href="#sosukodogai-bian">ソースコード改変</a>
+        </div>
+        <div>
+          <a href="#build">Build</a>
+        </div>
+        <div>
+          <a href="#create-rootfs">Create rootfs</a>
+        </div>
+        <div>
+          <a href="#boot">Boot</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="c">
+      <nav class="tpad"><div><a class="js m-protected" href="#bmFtZUBleGFtcGxlLmNvbQ==" target="_blank" title="Mail"><i type="Button" class="svg mail" title="Mail"></i></a><a href="https://mastodon.example.com/@username" target="_blank" title="Mastodon" rel="me"><i type="Button" class="svg mastodon" title="Mastodon"></i></a><a href="https://matrix.example.com/" target="_blank" title="Element"><i type="Button" class="svg element" title="Element"></i></a><a href="https://github.com/your-user-name/" target="_blank" title="Github"><i type="Button" class="svg github" title="Github"></i></a><a href="https://www.instagram.com/your-user-name/" target="_blank" title="Instagram"><i type="Button" class="svg instagram" title="Instagram"></i></a><a href="https://www.youtube.com/channel&#x2F;your-channel-id" target="_blank" title="YouTube"><i type="Button" class="svg youtube" title="YouTube"></i></a><a href="https://www.twitch.tv/your-user-name/" target="_blank" title="Twitch"><i type="Button" class="svg twitch" title="Twitch"></i></a><a href="https://www.ko-fi.com/your-user-name/" target="_blank" title="Support me on Ko-fi"><i type="Button" class="svg kofi" title="Support me on Ko-fi"></i></a></div></nav>
+      <nav class="vpad">
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/about/"> About </a>
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/contact/"> Contact </a>
+        <a class="rpad s90" href="https://github.com/rqdaA/l3tvia"> Repository </a>
+        <a class="rpad s90" href="https://l3tvia.rqda.wtf/atom.xml" target="_blank"> RSS </a>
+      </nav>
+      <p class="s80"> &copy; <span id="year">2025</span> L3tvia</p>
+      <p class="s80">Powered by <a href="https://www.getzola.org/" target="_blank">Zola</a> and <a href="https://github.com/jieiku/abridge/" target="_blank">Abridge</a></p>
+    </div>
+  </footer>
+</body>
+</html>
