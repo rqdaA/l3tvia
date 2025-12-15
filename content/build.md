@@ -48,7 +48,7 @@ git checkout v6.6.77
 
 ```sh
 # 依存パッケージのインストール
-sudo apt install libncurses-dev gawk flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf llvm bear dwarves cpio
+sudo apt install libncurses-dev gawk flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf llvm bear dwarves cpio bc
 ```
 
 #### - デフォルトでビルドする場合
