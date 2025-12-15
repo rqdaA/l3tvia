@@ -16,6 +16,11 @@ toc = true
 
 11日目はゃーさんの記事です。
 
+### 追記
+ゃーさんの記事はこちらです。
+
+[https://reversed-r.dev/articles/2025-12-12-coins-advent-calendar-install-openmediavault-to-buffalo-linkstation-nas/](https://reversed-r.dev/articles/2025-12-12-coins-advent-calendar-install-openmediavault-to-buffalo-linkstation-nas/)
+
 ---
 
 以下では、xnuのversionは`xnu-11417.140.69`を前提とします。
