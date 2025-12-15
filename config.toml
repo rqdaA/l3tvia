@@ -63,7 +63,7 @@ menu_footer = [
     {url = "about", name = "About", slash = true, blank = false, size="s90"},
     {url = "contact", name = "Contact", slash = true, blank = false, size="s90"},
     {url = "https://github.com/rqdaA/l3tvia", name = "Repository", slash = true, blank = false, size="s90"},
-    # {url = "sitemap.xml", name = "Sitemap", slash = false, blank = true, size="s90"},
+    {url = "atom.xml", name = "RSS", slash = false, blank = true, size="s90"},
 ]
 
 toc = true
